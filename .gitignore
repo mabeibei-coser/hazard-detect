@@ -1,6 +1,24 @@
+# Dependencies
 node_modules/
+
+# Build output
 dist/
+
+# Env / secrets
 .env
 .env.local
+.env*.local
+
+# Data (better-sqlite3)
+data/
+
+# Logs
 *.log
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/

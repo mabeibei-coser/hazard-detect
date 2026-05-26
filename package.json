@@ -1,11 +1,15 @@
 {
-  "name": "safety-hazard-client",
+  "name": "hazard-detect",
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "description": "安全隐患识别系统 - AI 图像识别 + 36 场景检查清单",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently -k -n vite,api -c green,cyan \"vite\" \"node server.js\"",
+    "dev:vite": "vite",
+    "dev:api": "node server.js",
     "build": "vite build",
+    "start": "NODE_ENV=production node server.js",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -14,6 +18,10 @@
     "@mui/icons-material": "^9.0.1",
     "@mui/material": "^9.0.1",
     "axios": "^1.6.0",
+    "better-sqlite3": "^12.10.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "iron-session": "^8.0.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "xlsx": "^0.18.5"
@@ -22,6 +30,7 @@
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^9.0.1",
     "vite": "^5.0.8"
   }
 }

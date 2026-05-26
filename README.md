@@ -1,181 +1,122 @@
-# 🔍 安全隐患识别系统
+# hazard-detect · 安全隐患识别
 
-AI 驱动的智能安全隐患检测与分析应用
+AI 驱动的安全隐患图像识别系统。用户上传现场照片 + 选择场景，星火大模型按 36 个专业场景的检查清单识别隐患，输出 JSON 报告（名称/等级/描述/规范/建议/预算）。
 
-## 功能特性
-
-- 📷 **双模式上传**：支持文件选择和摄像头拍照
-- 🎯 **10 种场景**：通用场景 + 医院/仓库/养老院/学校等 9 个垂直场景
-- 🤖 **AI 识别**：基于大模型的智能安全隐患识别
-- 📊 **结构化报告**：隐患名称/等级/描述/规范/建议/预算
-- 🎨 **现代 UI**：浅色主题 + 玻璃拟态设计
+部署在 `https://h100.jsai100.com/a600/`。源自 `hezw02/ASG01`，由 mabeibei-coser 接管 + 改造为可入 admin-hub 后台的形态（手机号登录 + 报告自动入库）。
 
 ## 技术栈
 
-**前端**
-- React 18 + Vite
-- Axios
-- 原生 CSS（玻璃拟态设计）
+- **前端**：React 18 + Vite + MUI（Material UI 9.x） + 玻璃拟态
+- **后端**：Node.js + Express + better-sqlite3 + iron-session
+- **AI**：讯飞星火 maaS multimodal（`astron-code-latest`）
+- **部署**：腾讯云 Lighthouse + pm2 + nginx 反代
 
-**后端**
-- Node.js + Express
-- Multer（文件上传）
-- Axios（HTTP 请求）
+## 本机跑起来
 
-**大模型**
-- 星火大模型 API（astron-code-latest）
-
-## 快速开始
-
-### 1. 安装依赖
-
-#### 前端
 ```bash
-cd client
+# 1. 装依赖
 npm install
-```
 
-#### 后端
-```bash
-cd server
-npm install
-```
+# 2. 配 env（首次）
+cp .env.local.example .env.local
+# 编辑 .env.local，填 IFLYTEK_API_KEY + HAZARD_SESSION_PASSWORD
+# session 密钥用：
+#   node -e "console.log(require('crypto').randomBytes(48).toString('base64'))"
 
-### 2. 启动服务
-
-#### 后端（终端 1）
-```bash
-cd server
+# 3. 启动（同时跑 vite + node server.js）
 npm run dev
+# vite:  http://localhost:3000
+# api:   http://localhost:4001
 ```
-服务运行在：http://localhost:5000
 
-#### 前端（终端 2）
-```bash
-cd client
-npm run dev
+## 数据库 schema
+
+`data/hazard-detect.db`（better-sqlite3 + WAL）
+
+```sql
+users (
+  id            INTEGER PK,
+  phone         TEXT UNIQUE,
+  created_at    INTEGER,         -- ms 时间戳
+  last_login_at INTEGER
+)
+
+reports (
+  id              INTEGER PK,
+  user_id         INTEGER,
+  user_phone      TEXT,           -- denorm，方便 admin-hub 直接 SELECT
+  created_at      INTEGER,        -- ms 时间戳
+  scenario        TEXT,           -- 场景 id，如 general / hospital
+  scenario_label  TEXT,           -- 场景中文名
+  hazard_count    INTEGER,        -- 本次识别出几条隐患
+  report_json     TEXT,           -- 完整 hazards 数组 JSON
+  duration_ms     INTEGER,        -- AI 耗时，KPI 用
+  ip              TEXT,
+  user_agent      TEXT
+)
 ```
-应用运行在：http://localhost:3000
 
-### 3. 使用流程
+## 环境变量
 
-1. 访问 http://localhost:3000
-2. 上传照片或拍照
-3. 选择场景类型
-4. 点击"开始识别隐患"
-5. 查看 AI 分析结果
+见 `.env.local.example`。生产环境清单：
 
-## 10 个预设场景
+| 变量 | 必填 | 说明 |
+|---|---|---|
+| `IFLYTEK_API_KEY` | ✓ | 讯飞 MaaS `api-key:secret`，服务端持有，浏览器不可见 |
+| `IFLYTEK_MODEL` | | 默认 `astron-code-latest` |
+| `HAZARD_SESSION_PASSWORD` | ✓ | iron-session 密钥，≥32 字符，base64 推荐（避免 `$` 触发 dotenv 展开） |
+| `HAZARD_COOKIE_SECURE` | | `false` 本地 dev，生产 HTTPS 留空（默认严格） |
+| `HAZARD_COOKIE_PATH` | | 子路径部署填 `/a600` |
+| `HAZARD_DB_PATH` | | 默认 `./data/hazard-detect.db`，admin-hub ATTACH 时用绝对路径 |
+| `PORT` | | 默认 4001 |
+| `VITE_BASE_PATH` | | 子路径部署填 `/a600/` |
 
-1. ⭐ 通用场景（默认）
-2. 🏥 医院
-3. 🏭 仓库
-4. 👴 养老院
-5. 🏫 学校
-6. 🏢 办公楼
-7. 🏗️ 建筑工地
-8. 🏪 商场超市
-9. 🏨 酒店
-10. 🚇 交通枢纽
+## API
 
-## 输出字段
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST | `/api/login` | body `{ phone }`，11 位手机号无 OTP |
+| POST | `/api/logout` | 销毁 session |
+| GET | `/api/me` | 当前登录态 |
+| POST | `/api/analyze` | body `{ scenario, imageBase64, mimeType }`，登录后调，调讯飞 + 入库 + 返回 `{ reportId, hazards, durationMs }` |
 
-- **隐患名称**：简洁描述（20 字以内）
-- **隐患等级**：高/中/低
-- **隐患描述**：详细说明（100-300 字）
-- **涉及规范**：国家标准或行业规范
-- **整改建议**：分步骤操作指南
-- **预算经费**：金额范围估算
+## 36 个场景
 
-## API 文档
+按 4 大类分组（详见 `src/components/ScenarioDropdown.jsx`）：
 
-### POST /api/analyze
+- **通用场景**：general
+- **人员密集与生活服务场所（17）**：居民住宅 / 医院 / 学校 / 养老院 / 写字楼 / 商场 / 农贸市场 / 餐饮后厨 / 酒店 / 体育馆 / 交通枢纽 / 沿街商铺 / 公园广场 / 影院 KTV / 图书馆 / 文物古建 / 景区
+- **工业与生产作业场所（13）**：通用仓库 / 危化品仓库 / 化工车间 / 建筑工地 / 加油站 / 工业园区 / 港口码头 / 印刷喷涂 / 有限空间 / 高处作业 / 物流分拨 / 汽车维修 / 食品加工
+- **特种设施与极端风险场所（5）**：配电站 / 数据中心 / 电动车充电棚 / 地下管廊 / 露天矿山
 
-**请求参数**
-- `image`: 图片文件（multipart/form-data）
-- `scenario`: 场景 ID（可选，默认 general）
+## 接入 admin-hub
 
-**响应示例**
-```json
-{
-  "success": true,
-  "data": {
-    "hazard_name": "消防通道堵塞",
-    "hazard_level": "高",
-    "hazard_description": "...",
-    "relevant_regulations": "GB 50016-2014...",
-    "rectification_suggestions": "1. 立即清理...\n2. 设置警示...",
-    "estimated_budget": "¥1,000 - 2,000 元"
-  }
-}
-```
+本项目已按 admin-hub 接入规范改造（手机号登录 + better-sqlite3 + WAL + 标准 reports schema）。
+后续接入流程跑 `admin-hub-add-project` skill。
 
 ## 项目结构
 
 ```
-safety-hazard-app/
-├── client/              # 前端
-│   ├── src/
-│   │   ├── components/  # React 组件
-│   │   ├── styles/      # 样式文件
-│   │   ├── utils/       # 工具函数
-│   │   └── App.jsx      # 主组件
-│   └── package.json
-└── server/              # 后端
-    ├── src/
-    │   ├── routes/      # 路由
-    │   ├── services/    # 服务层
-    │   └── index.js     # 入口文件
-    ├── uploads/         # 上传文件临时目录
-    └── package.json
+hazard-detect/
+├── server.js              # Express 入口（登录 + 识别 + 静态托管）
+├── vite.config.js         # Vite 配置（dev proxy /api → :4001）
+├── lib/
+│   ├── db.js              # better-sqlite3 + schema
+│   ├── session.js         # iron-session 配置
+│   └── prompts.js         # 36 场景检查清单 + buildSystemPrompt + parseResult
+├── src/
+│   ├── App.jsx            # 主组件（登录态切换）
+│   ├── main.jsx
+│   ├── components/
+│   │   ├── LoginForm.jsx
+│   │   ├── ScenarioDropdown.jsx
+│   │   ├── ImageUploader.jsx
+│   │   └── ResultTable.jsx
+│   ├── styles/
+│   └── utils/
+│       └── api.js         # 前端 API 客户端（fetchMe / login / analyze）
+├── data/                  # SQLite 数据（gitignored）
+├── docs/                  # 原作者笔记（仅参考）
+├── .env.local             # 本地 dev 配置（gitignored）
+└── .env.local.example
 ```
-
-## 开发说明
-
-### 添加新场景
-
-1. 在 `client/src/components/ScenarioSelector.jsx` 中添加场景
-2. 在 `server/src/services/llmService.js` 中添加场景提示词
-
-### 调整 UI 样式
-
-- 主样式：`client/src/styles/index.css`
-- 组件样式：`client/src/styles/App.css`
-
-### 修改大模型配置
-
-编辑 `server/.env` 文件：
-- `LLM_API_KEY`: API 密钥
-- `LLM_API_URL`: API 地址
-- `LLM_MODEL_ID`: 模型 ID
-
-## 注意事项
-
-- 图片大小限制：10MB
-- 支持格式：JPEG, PNG, WEBP
-- 建议在网络良好的环境下使用
-- 大模型响应时间：5-30 秒
-
-## 部署建议
-
-### 前端部署
-```bash
-cd client
-npm run build
-# 将 dist 目录部署到 Web 服务器
-```
-
-### 后端部署
-```bash
-cd server
-npm start
-# 使用 PM2 等进程管理工具
-```
-
-## 许可证
-
-MIT
-
-## 联系方式
-
-如有问题，请联系开发团队。
