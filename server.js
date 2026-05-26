@@ -11,7 +11,7 @@ const { getSession } = await import("./lib/session.js");
 const { getDb, upsertUserByPhone, insertReport } = await import("./lib/db.js");
 const { buildSystemPrompt, parseResult, SCENARIO_LABELS } = await import("./lib/prompts.js");
 
-const PORT = Number(process.env.PORT) || 4001;
+const PORT = Number(process.env.HAZARD_API_PORT || process.env.PORT) || 4001;
 const IFLYTEK_URL =
   process.env.IFLYTEK_API_URL ||
   "https://maas-coding-api.cn-huabei-1.xf-yun.com/v2/chat/completions";

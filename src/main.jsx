@@ -13,10 +13,10 @@ const theme = createTheme({
     text: { primary: '#1a1a2e', secondary: '#64748b' },
   },
   typography: {
-    fontFamily: "'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-    h4: { fontWeight: 700 },
-    h5: { fontWeight: 600 },
-    h6: { fontWeight: 600 },
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', system-ui, 'Inter', 'Noto Sans SC', sans-serif",
+    h4: { fontWeight: 700, letterSpacing: '-0.02em' },
+    h5: { fontWeight: 600, letterSpacing: '-0.01em' },
+    h6: { fontWeight: 600, letterSpacing: '-0.01em' },
   },
   components: {
     MuiOutlinedInput: {

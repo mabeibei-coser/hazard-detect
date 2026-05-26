@@ -13,9 +13,18 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', system-ui, 'Inter', 'Noto Sans SC', sans-serif;
   background: #f4f6f9;
   -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+}
+
+/* monospace 数字字体栈,SF Mono 优先(Mac),Cascadia / Consolas 兜底(Win)。
+   用 !important 压过 MUI Typography 注入的 fontFamily */
+.font-mono-num {
+  font-family: 'SF Mono', 'Cascadia Code', 'JetBrains Mono', 'Consolas', 'Menlo', 'Monaco', ui-monospace, monospace !important;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
 }
 
 .glass-card {
