@@ -121,52 +121,45 @@ function App() {
   return (
     <Box sx={{ minHeight: '100vh', py: { xs: 2, md: 4 }, backgroundColor: '#f4f6f9' }}>
       <Container maxWidth="lg">
-        {/* 头部：手机号 + 退出 + 标题 */}
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', md: 'row' },
-            justifyContent: 'space-between',
-            alignItems: { xs: 'stretch', md: 'flex-start' },
-            mb: 3,
-            gap: { xs: 0.5, md: 2 },
-          }}
-        >
-          <Box
+        {/* 顶部：手机号 + 退出（右上角小角标，桌面/手机一致） */}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 0.5, mb: 1 }}>
+          <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.75rem' }}>
+            {me.phone}
+          </Typography>
+          <Tooltip title="退出登录">
+            <IconButton size="small" onClick={handleLogout} sx={{ color: '#94a3b8', p: 0.5 }}>
+              <LogoutIcon sx={{ fontSize: 16 }} />
+            </IconButton>
+          </Tooltip>
+        </Box>
+
+        {/* 标题块：永远 prominent 居中 */}
+        <Box sx={{ textAlign: 'center', mb: 3 }}>
+          <Typography
+            variant="h4"
+            color="primary.main"
             sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.5,
-              order: { xs: -1, md: 1 },
-              alignSelf: { xs: 'flex-end', md: 'auto' },
-              mt: { md: 1 },
+              fontWeight: 700,
+              mb: 1,
+              fontSize: { xs: '1.5rem', md: '2.125rem' },
+              lineHeight: 1.2,
             }}
           >
-            <Typography variant="caption" sx={{ color: '#64748b', fontSize: { xs: '0.7rem', md: '0.75rem' } }}>
-              {me.phone}
-            </Typography>
-            <Tooltip title="退出登录">
-              <IconButton size="small" onClick={handleLogout} sx={{ color: '#94a3b8', p: 0.5 }}>
-                <LogoutIcon sx={{ fontSize: 16 }} />
-              </IconButton>
-            </Tooltip>
-          </Box>
-
-          <Box sx={{ flex: 1, textAlign: 'center', minWidth: 0 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 1 }}>
-              <Typography variant="h4" color="primary.main" sx={{ fontWeight: 700 }}>
-                安全隐患识别 5.0
-                <Chip
-                  label="专业版"
-                  size="small"
-                  sx={{
-                    ml: 1, backgroundColor: 'primary.main', color: '#fff',
-                    fontWeight: 600, fontSize: '0.7rem', height: 20,
-                    verticalAlign: 'super', minWidth: 45,
-                  }}
-                />
-              </Typography>
-            </Box>
+            安全隐患识别 5.0
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, flexWrap: 'wrap' }}>
+            <Chip
+              label="专业版"
+              size="small"
+              sx={{
+                backgroundColor: 'primary.main',
+                color: '#fff',
+                fontWeight: 600,
+                fontSize: '0.7rem',
+                height: 20,
+                minWidth: 45,
+              }}
+            />
             <Typography variant="body2" color="text.secondary">
               全新升级AI 安全隐患检测平台
             </Typography>
@@ -225,7 +218,7 @@ function App() {
         )}
       </Container>
 
-      <Box sx={{ textAlign: 'center', mt: 4, py: 2, color: 'text.muted' }}>
+      <Box sx={{ textAlign: 'center', mt: 4, py: 2, color: 'text.secondary' }}>
         <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
           全新一代安全大模型5.0
         </Typography>

@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 import {
-  Box, Typography, Menu, MenuItem, Divider
+  Box, Typography, Menu, MenuItem, Divider,
+  Dialog, DialogTitle, DialogContent, IconButton,
+  List, ListItemButton, ListItemIcon, ListItemText, ListSubheader,
+  useMediaQuery
 } from '@mui/material'
 import {
   Star, Home, LocalHospital, School, Elderly, Warehouse, Warning,
@@ -10,7 +13,7 @@ import {
   ElectricBolt, CellTower, Print, Construction as ConstructionWork,
   TwoWheeler, LocalShipping, Plumbing,
   Terrain, FoodBank, LocalGasStation,
-  KeyboardArrowDown, KeyboardArrowRight
+  KeyboardArrowDown, KeyboardArrowRight, Close
 } from '@mui/icons-material'
 
 const SCENARIO_GROUPS = [
@@ -85,8 +88,13 @@ function findName(id) {
 }
 
 function ScenarioDropdown({ value, onChange }) {
+  const isMobile = useMediaQuery('(max-width:600px)')
+
   const [anchorEl, setAnchorEl] = useState(null)
   const open = Boolean(anchorEl)
+
+  // 手机端：全屏 Dialog
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   // 第一层：当前选中的分类
   const [currentGroup, setCurrentGroup] = useState('general')
@@ -103,8 +111,12 @@ function ScenarioDropdown({ value, onChange }) {
     }
   }, [value])
 
-  const handleOpen = (e) => setAnchorEl(e.currentTarget)
+  const handleOpen = (e) => {
+    if (isMobile) setMobileOpen(true)
+    else setAnchorEl(e.currentTarget)
+  }
   const handleClose = () => { setAnchorEl(null); setSubAnchorEl(null) }
+  const handleMobileSelect = (id) => { onChange(id); setMobileOpen(false) }
 
   // 点击第一层分类
   const handleGroupClick = (groupKey, e) => {
@@ -188,7 +200,7 @@ function ScenarioDropdown({ value, onChange }) {
         })}
       </Menu>
 
-      {/* 第二层菜单：具体场景 */}
+      {/* 第二层菜单：具体场景（仅桌面端使用） */}
       {activeGroup && activeGroup.items.length > 1 && (
         <Menu
           anchorEl={subAnchorEl}
@@ -226,6 +238,76 @@ function ScenarioDropdown({ value, onChange }) {
           })}
         </Menu>
       )}
+
+      {/* 手机端：全屏 Dialog，所有场景按分组扁平展示 */}
+      <Dialog
+        fullScreen
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        PaperProps={{ sx: { backgroundColor: '#f4f6f9' } }}
+      >
+        <DialogTitle
+          sx={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            backgroundColor: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
+            py: 1.5, px: 2,
+          }}
+        >
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>选择检查场景</Typography>
+          <IconButton onClick={() => setMobileOpen(false)} size="small" aria-label="关闭">
+            <Close />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0 }}>
+          <List sx={{ pt: 0, pb: 2 }}>
+            {SCENARIO_GROUPS.map((group) => (
+              <Box key={group.key}>
+                <ListSubheader
+                  sx={{
+                    backgroundColor: '#f4f6f9',
+                    fontWeight: 600,
+                    color: 'text.primary',
+                    fontSize: '0.8rem',
+                    lineHeight: '36px',
+                    px: 2,
+                  }}
+                >
+                  {group.label}
+                </ListSubheader>
+                {group.items.map((item) => {
+                  const IconComponent = item.icon
+                  const isSelected = value === item.id
+                  return (
+                    <ListItemButton
+                      key={item.id}
+                      onClick={() => handleMobileSelect(item.id)}
+                      sx={{
+                        backgroundColor: isSelected ? '#e8edf5' : '#fff',
+                        borderLeft: '3px solid',
+                        borderLeftColor: isSelected ? 'primary.main' : 'transparent',
+                        py: 1.25, px: 2,
+                        '&:hover': { backgroundColor: isSelected ? '#e8edf5' : '#f8fafc' },
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 36 }}>
+                        <IconComponent sx={{ fontSize: 20, color: isSelected ? 'primary.main' : 'text.secondary' }} />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={item.name}
+                        primaryTypographyProps={{
+                          fontSize: '0.95rem',
+                          fontWeight: isSelected ? 600 : 400,
+                          color: isSelected ? 'primary.main' : 'text.primary',
+                        }}
+                      />
+                    </ListItemButton>
+                  )
+                })}
+              </Box>
+            ))}
+          </List>
+        </DialogContent>
+      </Dialog>
     </Box>
   )
 }
