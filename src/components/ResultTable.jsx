@@ -187,7 +187,7 @@ function ResultTable({ hazards, scenario, imagePreview }) {
         </Box>
       )}
 
-      {/* 7 列表格：桌面正常展示；手机端 min-width 720 触发横向滚动 */}
+      {/* 7 列表格：桌面正常；手机端 # + 隐患名称 sticky 固定，其他字段横向滑 */}
       <TableContainer
         component={Paper}
         variant="outlined"
@@ -200,31 +200,75 @@ function ResultTable({ hazards, scenario, imagePreview }) {
         <Table
           size="small"
           sx={{
-            minWidth: 720,
+            minWidth: { xs: 820, md: 'auto' },
             '& .MuiTableCell-root': {
               verticalAlign: 'top',
               wordBreak: 'break-word',
             },
+            // 手机端：# 列 + 隐患名称列 sticky
+            '& .col-sticky-1': {
+              position: { xs: 'sticky', md: 'static' },
+              left: 0,
+              zIndex: { xs: 2, md: 'auto' },
+              backgroundColor: { xs: '#fff', md: 'transparent' },
+            },
+            '& .col-sticky-2': {
+              position: { xs: 'sticky', md: 'static' },
+              left: { xs: 56, md: 'auto' },
+              zIndex: { xs: 2, md: 'auto' },
+              backgroundColor: { xs: '#fff', md: 'transparent' },
+            },
+            // hover 时 sticky 列背景跟随
+            '& .MuiTableRow-root:hover .col-sticky-1, & .MuiTableRow-root:hover .col-sticky-2': {
+              backgroundColor: { xs: '#fafbfc', md: 'transparent' },
+            },
+            // header sticky 列 zIndex 更高 + 维持表头背景
+            '& .MuiTableHead-root .col-sticky-1, & .MuiTableHead-root .col-sticky-2': {
+              zIndex: { xs: 3, md: 'auto' },
+              backgroundColor: '#f8fafc',
+            },
+            // 第 2 列右边加一道阴影分界（暗示 sticky 边界），仅手机端
+            '& .col-sticky-2::after': {
+              content: { xs: '""', md: 'none' },
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              right: -1,
+              width: 6,
+              background: 'linear-gradient(to right, rgba(0,0,0,0.08), transparent)',
+              pointerEvents: 'none',
+            },
           }}
         >
           <TableHead>
-            <TableRow sx={{ backgroundColor: '#f8fafc' }}>
-              <TableCell width="5%" align="center">#</TableCell>
-              <TableCell width="14%">隐患名称</TableCell>
-              <TableCell width="8%">等级</TableCell>
-              <TableCell width="28%">具体描述</TableCell>
-              <TableCell width="18%">涉及规范</TableCell>
-              <TableCell width="17%">整改建议</TableCell>
-              <TableCell width="10%" align="right">预算经费</TableCell>
+            <TableRow>
+              <TableCell
+                className="col-sticky-1"
+                align="center"
+                sx={{ width: { xs: 56, md: '5%' }, minWidth: 56 }}
+              >
+                #
+              </TableCell>
+              <TableCell
+                className="col-sticky-2"
+                sx={{ width: { xs: 140, md: '14%' }, minWidth: 140 }}
+              >
+                隐患名称
+              </TableCell>
+              <TableCell sx={{ width: { xs: 80, md: '8%' }, minWidth: 80 }}>等级</TableCell>
+              <TableCell sx={{ width: { xs: 200, md: '28%' }, minWidth: 200 }}>具体描述</TableCell>
+              <TableCell sx={{ width: { xs: 140, md: '18%' }, minWidth: 140 }}>涉及规范</TableCell>
+              <TableCell sx={{ width: { xs: 200, md: '17%' }, minWidth: 200 }}>整改建议</TableCell>
+              <TableCell sx={{ width: { xs: 100, md: '10%' }, minWidth: 100 }} align="right">预算经费</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {hazardList.map((hazard, i) => (
               <TableRow key={i} hover>
-                <TableCell align="center">
+                <TableCell className="col-sticky-1" align="center">
                   <Chip label={i + 1} size="small" color="primary" sx={{ minWidth: 28 }} />
                 </TableCell>
-                <TableCell>
+                <TableCell className="col-sticky-2">
                   <Typography variant="body2" fontWeight={700} sx={{ lineHeight: 1.4 }}>
                     {hazard.hazard_name}
                   </Typography>
@@ -278,7 +322,7 @@ function ResultTable({ hazards, scenario, imagePreview }) {
           fontSize: '0.7rem',
         }}
       >
-        ← 横向滑动查看完整表格 →
+        ← 横向滑动查看其他字段（#和名称固定不动）→
       </Typography>
     </Paper>
   )
