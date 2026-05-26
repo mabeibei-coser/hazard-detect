@@ -6,33 +6,12 @@ import CloseIcon from '@mui/icons-material/Close'
 
 function ImageUploader({ onImageSelect, imagePreview }) {
   const fileInputRef = useRef(null)
+  const cameraInputRef = useRef(null)
 
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (file && file.type.startsWith('image/')) {
       onImageSelect(file)
-    }
-  }
-
-  const handleCapture = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
-      })
-      const video = document.createElement('video')
-      video.srcObject = stream
-      await video.play()
-      const canvas = document.createElement('canvas')
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
-      canvas.getContext('2d').drawImage(video, 0, 0)
-      canvas.toBlob((blob) => {
-        const file = new File([blob], 'captured-photo.jpg', { type: 'image/jpeg' })
-        onImageSelect(file)
-        stream.getTracks().forEach(t => t.stop())
-      }, 'image/jpeg')
-    } catch {
-      alert('无法调用摄像头，请使用文件上传')
     }
   }
 
@@ -68,6 +47,7 @@ function ImageUploader({ onImageSelect, imagePreview }) {
           }}
         >
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
+          <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileChange} style={{ display: 'none' }} />
           <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Button
               variant="contained"
@@ -80,7 +60,7 @@ function ImageUploader({ onImageSelect, imagePreview }) {
             <Button
               variant="outlined"
               startIcon={<CameraAltIcon />}
-              onClick={handleCapture}
+              onClick={() => cameraInputRef.current?.click()}
               sx={{ px: 3 }}
             >
               拍照上传
