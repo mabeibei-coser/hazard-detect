@@ -187,145 +187,99 @@ function ResultTable({ hazards, scenario, imagePreview }) {
         </Box>
       )}
 
-      {/* 统一表格：桌面 + 手机共用 4 列结构 */}
-      <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
+      {/* 7 列表格：桌面正常展示；手机端 min-width 720 触发横向滚动 */}
+      <TableContainer
+        component={Paper}
+        variant="outlined"
+        sx={{
+          borderRadius: 2,
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
         <Table
           size="small"
           sx={{
-            tableLayout: 'fixed',
+            minWidth: 720,
             '& .MuiTableCell-root': {
-              px: { xs: 0.75, md: 2 },
-              py: { xs: 1, md: 1.25 },
               verticalAlign: 'top',
               wordBreak: 'break-word',
-            },
-            '& .MuiTableCell-head': {
-              fontSize: { xs: '0.7rem', md: '0.875rem' },
-              fontWeight: 700,
             },
           }}
         >
           <TableHead>
             <TableRow sx={{ backgroundColor: '#f8fafc' }}>
-              <TableCell width="8%" align="center">#</TableCell>
-              <TableCell width="50%">隐患</TableCell>
-              <TableCell width="28%">整改方案</TableCell>
-              <TableCell width="14%" align="right">预算</TableCell>
+              <TableCell width="5%" align="center">#</TableCell>
+              <TableCell width="14%">隐患名称</TableCell>
+              <TableCell width="8%">等级</TableCell>
+              <TableCell width="28%">具体描述</TableCell>
+              <TableCell width="18%">涉及规范</TableCell>
+              <TableCell width="17%">整改建议</TableCell>
+              <TableCell width="10%" align="right">预算经费</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {hazardList.map((hazard, i) => {
-              const cfg = LEVEL_CONFIG[hazard.hazard_level] || LEVEL_CONFIG['中']
-              return (
-                <TableRow key={i} hover>
-                  {/* # 序号 */}
-                  <TableCell align="center">
-                    <Chip
-                      label={i + 1}
-                      size="small"
-                      color="primary"
-                      sx={{
-                        minWidth: { xs: 22, md: 28 },
-                        height: { xs: 20, md: 24 },
-                        fontSize: { xs: '0.7rem', md: '0.8rem' },
-                        '& .MuiChip-label': { px: { xs: 0.75, md: 1 } },
-                      }}
-                    />
-                  </TableCell>
-
-                  {/* 隐患列：名称 + 等级 Chip + 描述 + 规范 */}
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.75, mb: 0.75, flexWrap: 'wrap' }}>
-                      <Typography
-                        component="span"
-                        fontWeight={700}
-                        sx={{
-                          fontSize: { xs: '0.85rem', md: '0.95rem' },
-                          lineHeight: 1.35,
-                          flex: '1 1 auto',
-                          minWidth: 0,
-                          wordBreak: 'break-word',
-                        }}
-                      >
-                        {hazard.hazard_name}
-                      </Typography>
-                      <Chip
-                        label={hazard.hazard_level + '风险'}
-                        size="small"
-                        sx={{
-                          backgroundColor: cfg.bg,
-                          color: cfg.color,
-                          fontWeight: 700,
-                          fontSize: { xs: '0.65rem', md: '0.7rem' },
-                          height: { xs: 18, md: 20 },
-                          borderRadius: 1,
-                          flexShrink: 0,
-                          '& .MuiChip-label': { px: 0.75 },
-                        }}
-                      />
-                    </Box>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontSize: { xs: '0.78rem', md: '0.85rem' },
-                        lineHeight: 1.55,
-                        color: 'text.primary',
-                        mb: 0.5,
-                      }}
-                    >
-                      {hazard.hazard_description}
-                    </Typography>
-                    <Typography
-                      sx={{
-                        fontFamily: 'monospace',
-                        fontSize: { xs: '0.68rem', md: '0.75rem' },
-                        color: 'text.secondary',
-                        wordBreak: 'break-all',
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      {hazard.relevant_regulations}
-                    </Typography>
-                  </TableCell>
-
-                  {/* 整改方案 */}
-                  <TableCell>
-                    <Box
-                      component="ul"
-                      sx={{
-                        m: 0,
-                        pl: { xs: 1.5, md: 2 },
-                        fontSize: { xs: '0.75rem', md: '0.8rem' },
-                        lineHeight: 1.55,
-                        '& li': { mb: 0.25 },
-                      }}
-                    >
-                      {hazard.rectification_suggestions.split('\n').filter(s => s.trim()).map((s, j) => (
-                        <li key={j}>{s.replace(/^\d+[\.\、\s]*/, '')}</li>
-                      ))}
-                    </Box>
-                  </TableCell>
-
-                  {/* 预算 */}
-                  <TableCell align="right">
-                    <Typography
-                      fontWeight={700}
-                      color="primary.main"
-                      sx={{
-                        fontSize: { xs: '0.78rem', md: '0.9rem' },
-                        wordBreak: 'break-all',
-                        lineHeight: 1.4,
-                      }}
-                    >
-                      {hazard.estimated_budget}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              )
-            })}
+            {hazardList.map((hazard, i) => (
+              <TableRow key={i} hover>
+                <TableCell align="center">
+                  <Chip label={i + 1} size="small" color="primary" sx={{ minWidth: 28 }} />
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2" fontWeight={700} sx={{ lineHeight: 1.4 }}>
+                    {hazard.hazard_name}
+                  </Typography>
+                </TableCell>
+                <TableCell>{getLevelLabel(hazard.hazard_level)}</TableCell>
+                <TableCell>
+                  <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
+                    {hazard.hazard_description}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontFamily: 'monospace',
+                      fontSize: '0.78rem',
+                      color: 'text.secondary',
+                      wordBreak: 'break-all',
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {hazard.relevant_regulations}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Box component="ul" sx={{ m: 0, pl: 2, fontSize: '0.8rem', lineHeight: 1.6, '& li': { mb: 0.25 } }}>
+                    {hazard.rectification_suggestions.split('\n').filter(s => s.trim()).map((s, j) => (
+                      <li key={j}>{s.replace(/^\d+[\.\、\s]*/, '')}</li>
+                    ))}
+                  </Box>
+                </TableCell>
+                <TableCell align="right">
+                  <Typography variant="body2" fontWeight={700} color="primary.main" sx={{ fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
+                    {hazard.estimated_budget}
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* 手机端滑动提示（仅 xs 显示） */}
+      <Typography
+        variant="caption"
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          textAlign: 'center',
+          color: 'text.secondary',
+          mt: 1,
+          fontSize: '0.7rem',
+        }}
+      >
+        ← 横向滑动查看完整表格 →
+      </Typography>
     </Paper>
   )
 }
