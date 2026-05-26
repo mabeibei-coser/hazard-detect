@@ -139,6 +139,8 @@ app.post(
         durationMs,
         ip: req.ip,
         userAgent: req.headers["user-agent"] || null,
+        imageBase64,
+        imageMime: mime,
       });
 
       res.json({ ok: true, reportId, hazards, durationMs });
