@@ -106,12 +106,12 @@ function SectionLabel({ children }) {
   return (
     <Typography
       sx={{
-        fontSize: '0.65rem',
+        fontSize: '0.75rem',
         fontWeight: 700,
-        color: '#94a3b8',
+        color: '#475569',
         textTransform: 'uppercase',
         letterSpacing: '0.12em',
-        mb: 0.625,
+        mb: 0.75,
       }}
     >
       {children}
@@ -154,79 +154,58 @@ function HazardCard({ hazard, index }) {
         },
       }}
     >
-      {/* 顶部条:等级 + 预算 */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          px: 2.25,
-          pt: 1.75,
-          pb: 1.25,
-        }}
-      >
-        <LevelBadge level={hazard.hazard_level} size="lg" />
-        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
-          <Typography
-            sx={{
-              fontSize: '0.625rem',
-              fontWeight: 600,
-              color: '#94a3b8',
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-            }}
-          >
-            预算
-          </Typography>
-          <Typography
-            className="font-mono-num"
-            sx={{
-              fontWeight: 700,
-              fontSize: '1rem',
-              color: '#0f172a',
-              letterSpacing: '-0.01em',
-              lineHeight: 1.2,
-            }}
-          >
-            {hazard.estimated_budget}
-          </Typography>
-        </Box>
-      </Box>
-
-      {/* 标题行:序号 + 隐患名 */}
-      <Box sx={{ px: 2.25, pb: 1.5, display: 'flex', alignItems: 'baseline', gap: 1.25 }}>
+      {/* ① 标题区:大编号 + 隐患名 + 等级 badge(对应表格:# / 隐患名称 / 等级)*/}
+      <Box sx={{
+        px: 2.25, pt: 2.25, pb: 1.75,
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 1.5,
+      }}>
+        {/* 大字编号(等级着色,加粗) */}
         <Typography
           className="font-mono-num"
           sx={{
-            fontSize: '0.75rem',
-            fontWeight: 600,
-            color: '#cbd5e1',
-            letterSpacing: '0.05em',
+            fontSize: '1.875rem',
+            fontWeight: 800,
+            color: d.stripe,
+            lineHeight: 0.95,
+            letterSpacing: '-0.04em',
             flexShrink: 0,
-            lineHeight: 1.2,
+            mt: '2px',
           }}
         >
           {String(index + 1).padStart(2, '0')}
         </Typography>
-        <Typography
-          sx={{
-            fontSize: '1.0625rem',
-            fontWeight: 700,
-            color: '#0f172a',
-            lineHeight: 1.35,
-            letterSpacing: '-0.015em',
-            textWrap: 'balance',
-          }}
-        >
-          {hazard.hazard_name}
-        </Typography>
+
+        {/* 标题 + 等级 badge */}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Box sx={{ mb: 0.75 }}>
+            <LevelBadge level={hazard.hazard_level} size="lg" />
+          </Box>
+          <Typography
+            sx={{
+              fontSize: '1.3125rem',
+              fontWeight: 800,
+              color: '#0f172a',
+              lineHeight: 1.25,
+              letterSpacing: '-0.02em',
+              textWrap: 'balance',
+            }}
+          >
+            {hazard.hazard_name}
+          </Typography>
+        </Box>
       </Box>
 
-      {/* 描述 */}
-      <Box sx={{ px: 2.25, pb: 1.75 }}>
+      {/* hairline */}
+      <Box sx={{ height: 1, backgroundColor: 'rgba(15,23,42,0.06)', mx: 2.25 }} />
+
+      {/* ② 具体描述 */}
+      <Box sx={{ px: 2.25, pt: 1.5, pb: 1.75 }}>
+        <SectionLabel>具体描述</SectionLabel>
         <Typography
           sx={{
-            fontSize: '0.875rem',
+            fontSize: '0.9375rem',
             lineHeight: 1.65,
             color: '#334155',
             textWrap: 'pretty',
@@ -239,61 +218,97 @@ function HazardCard({ hazard, index }) {
       {/* hairline */}
       <Box sx={{ height: 1, backgroundColor: 'rgba(15,23,42,0.06)', mx: 2.25 }} />
 
-      {/* 整改建议 */}
-      {suggestions.length > 0 && (
-        <Box sx={{ px: 2.25, pt: 1.5, pb: 1.25 }}>
-          <SectionLabel>整改建议</SectionLabel>
-          <Box component="ol" sx={{ m: 0, p: 0, listStyle: 'none' }}>
-            {suggestions.map((s, j) => (
-              <Box
-                component="li"
-                key={j}
-                sx={{
-                  display: 'flex',
-                  gap: 1,
-                  mb: j === suggestions.length - 1 ? 0 : 0.625,
-                  fontSize: '0.875rem',
-                  lineHeight: 1.55,
-                  color: '#334155',
-                }}
-              >
-                <Box
-                  className="font-mono-num"
-                  sx={{
-                    fontWeight: 600,
-                    fontSize: '0.7rem',
-                    color: d.stripe,
-                    letterSpacing: '0.02em',
-                    flexShrink: 0,
-                    pt: '3px',
-                    minWidth: 16,
-                  }}
-                >
-                  {String(j + 1).padStart(2, '0')}
-                </Box>
-                <Box sx={{ flex: 1 }}>{s}</Box>
-              </Box>
-            ))}
-          </Box>
-        </Box>
-      )}
-
-      {/* hairline */}
-      <Box sx={{ height: 1, backgroundColor: 'rgba(15,23,42,0.06)', mx: 2.25 }} />
-
-      {/* 涉及规范 */}
-      <Box sx={{ px: 2.25, pt: 1.25, pb: 1.75 }}>
+      {/* ③ 涉及规范 */}
+      <Box sx={{ px: 2.25, pt: 1.5, pb: 1.75 }}>
         <SectionLabel>涉及规范</SectionLabel>
         <Typography
           className="font-mono-num"
           sx={{
-            fontSize: '0.75rem',
-            lineHeight: 1.55,
-            color: '#64748b',
+            fontSize: '0.8125rem',
+            lineHeight: 1.6,
+            color: '#475569',
             wordBreak: 'break-all',
           }}
         >
           {hazard.relevant_regulations}
+        </Typography>
+      </Box>
+
+      {/* hairline */}
+      <Box sx={{ height: 1, backgroundColor: 'rgba(15,23,42,0.06)', mx: 2.25 }} />
+
+      {/* ④ 整改建议 */}
+      {suggestions.length > 0 && (
+        <>
+          <Box sx={{ px: 2.25, pt: 1.5, pb: 1.5 }}>
+            <SectionLabel>整改建议</SectionLabel>
+            <Box component="ol" sx={{ m: 0, p: 0, listStyle: 'none' }}>
+              {suggestions.map((s, j) => (
+                <Box
+                  component="li"
+                  key={j}
+                  sx={{
+                    display: 'flex',
+                    gap: 1.125,
+                    mb: j === suggestions.length - 1 ? 0 : 0.75,
+                    fontSize: '0.9375rem',
+                    lineHeight: 1.55,
+                    color: '#334155',
+                  }}
+                >
+                  <Box
+                    className="font-mono-num"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '0.8125rem',
+                      color: d.stripe,
+                      letterSpacing: '0.02em',
+                      flexShrink: 0,
+                      pt: '3px',
+                      minWidth: 20,
+                    }}
+                  >
+                    {String(j + 1).padStart(2, '0')}
+                  </Box>
+                  <Box sx={{ flex: 1 }}>{s}</Box>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+          <Box sx={{ height: 1, backgroundColor: 'rgba(15,23,42,0.06)', mx: 2.25 }} />
+        </>
+      )}
+
+      {/* ⑤ 预算经费(底部右对齐,大字收尾)*/}
+      <Box sx={{
+        px: 2.25, pt: 1.5, pb: 2,
+        display: 'flex',
+        alignItems: 'baseline',
+        justifyContent: 'space-between',
+        gap: 1,
+      }}>
+        <Typography
+          sx={{
+            fontSize: '0.75rem',
+            fontWeight: 700,
+            color: '#475569',
+            textTransform: 'uppercase',
+            letterSpacing: '0.12em',
+          }}
+        >
+          预算经费
+        </Typography>
+        <Typography
+          className="font-mono-num"
+          sx={{
+            fontWeight: 800,
+            fontSize: '1.5rem',
+            color: '#0f172a',
+            letterSpacing: '-0.02em',
+            lineHeight: 1.1,
+          }}
+        >
+          {hazard.estimated_budget}
         </Typography>
       </Box>
     </Box>
