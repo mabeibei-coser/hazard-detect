@@ -1,7 +1,7 @@
 {
   "name": "hazard-detect",
   "private": true,
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "description": "安全隐患识别系统 - AI 图像识别 + 36 场景检查清单",
   "scripts": {
