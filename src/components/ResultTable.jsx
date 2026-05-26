@@ -177,11 +177,8 @@ function HazardCard({ hazard, index }) {
           {String(index + 1).padStart(2, '0')}
         </Typography>
 
-        {/* 标题 + 等级 badge */}
+        {/* 标题 + 等级 badge(标题在上,badge 在下) */}
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Box sx={{ mb: 0.75 }}>
-            <LevelBadge level={hazard.hazard_level} size="lg" />
-          </Box>
           <Typography
             sx={{
               fontSize: '1.3125rem',
@@ -190,10 +187,12 @@ function HazardCard({ hazard, index }) {
               lineHeight: 1.25,
               letterSpacing: '-0.02em',
               textWrap: 'balance',
+              mb: 0.875,
             }}
           >
             {hazard.hazard_name}
           </Typography>
+          <LevelBadge level={hazard.hazard_level} size="lg" />
         </Box>
       </Box>
 
