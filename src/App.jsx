@@ -22,7 +22,7 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [hazards, setHazards] = useState(null)
   const [error, setError] = useState(null)
-  const [countdown, setCountdown] = useState(15)
+  const [countdown, setCountdown] = useState(20)
   const timerRef = useRef(null)
 
   useEffect(() => {
@@ -55,7 +55,7 @@ function App() {
     setLoading(true)
     setError(null)
     setHazards(null)
-    setCountdown(15)
+    setCountdown(20)
     timerRef.current = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) { clearInterval(timerRef.current); return 0 }
@@ -146,8 +146,6 @@ function App() {
             }}
           >
             安全隐患识别 5.0
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, flexWrap: 'wrap' }}>
             <Chip
               label="专业版"
               size="small"
@@ -158,12 +156,16 @@ function App() {
                 fontSize: '0.7rem',
                 height: 20,
                 minWidth: 45,
+                ml: 0.75,
+                verticalAlign: 'top',
+                position: 'relative',
+                top: '0.1em',
               }}
             />
-            <Typography variant="body2" color="text.secondary">
-              全新升级AI 安全隐患检测平台
-            </Typography>
-          </Box>
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            全新升级AI 安全隐患检测平台
+          </Typography>
         </Box>
 
         {/* 输入区域 */}

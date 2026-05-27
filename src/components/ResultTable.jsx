@@ -106,12 +106,14 @@ function SectionLabel({ children }) {
   return (
     <Typography
       sx={{
-        fontSize: '0.75rem',
+        display: 'inline-block',
+        fontSize: '0.8125rem',
         fontWeight: 700,
-        color: '#475569',
-        textTransform: 'uppercase',
-        letterSpacing: '0.12em',
-        mb: 0.75,
+        color: '#0f172a',
+        letterSpacing: 0,
+        mb: 0.875,
+        pb: 0.375,
+        borderBottom: '2px solid #1e3a5f',
       }}
     >
       {children}
@@ -278,33 +280,15 @@ function HazardCard({ hazard, index }) {
         </>
       )}
 
-      {/* ⑤ 预算经费(底部右对齐,大字收尾)*/}
-      <Box sx={{
-        px: 2.25, pt: 1.5, pb: 2,
-        display: 'flex',
-        alignItems: 'baseline',
-        justifyContent: 'space-between',
-        gap: 1,
-      }}>
+      {/* ⑤ 预算经费(与其他区块同一节奏:标题在上,值在下)*/}
+      <Box sx={{ px: 2.25, pt: 1.5, pb: 2 }}>
+        <SectionLabel>预算经费</SectionLabel>
         <Typography
           sx={{
-            fontSize: '0.75rem',
-            fontWeight: 700,
-            color: '#475569',
-            textTransform: 'uppercase',
-            letterSpacing: '0.12em',
-          }}
-        >
-          预算经费
-        </Typography>
-        <Typography
-          className="font-mono-num"
-          sx={{
-            fontWeight: 800,
-            fontSize: '1.5rem',
-            color: '#0f172a',
-            letterSpacing: '-0.02em',
-            lineHeight: 1.1,
+            fontSize: '0.9375rem',
+            lineHeight: 1.6,
+            color: '#334155',
+            textWrap: 'pretty',
           }}
         >
           {hazard.estimated_budget}
@@ -488,9 +472,9 @@ function ResultTable({ hazards, scenario, imagePreview }) {
         </Button>
       </Box>
 
-      {/* ───────── 分析照片(共用) ───────── */}
+      {/* ───────── 分析照片(仅手机端,桌面端在表格行内显示缩略图) ───────── */}
       {imagePreview && (
-        <Box sx={{ mb: 2 }}>
+        <Box sx={{ mb: 2, display: { xs: 'block', md: 'none' } }}>
           <img
             src={imagePreview}
             alt="已分析照片"
@@ -518,13 +502,14 @@ function ResultTable({ hazards, scenario, imagePreview }) {
           >
             <TableHead>
               <TableRow sx={{ backgroundColor: '#f8fafc' }}>
-                <TableCell width="5%" align="center">#</TableCell>
-                <TableCell width="14%">隐患名称</TableCell>
-                <TableCell width="8%">等级</TableCell>
-                <TableCell width="28%">具体描述</TableCell>
-                <TableCell width="18%">涉及规范</TableCell>
-                <TableCell width="17%">整改建议</TableCell>
-                <TableCell width="10%" align="right">预算经费</TableCell>
+                <TableCell width="4%" align="center">#</TableCell>
+                <TableCell width="8%" align="center">现场照片</TableCell>
+                <TableCell width="13%">隐患名称</TableCell>
+                <TableCell width="7%">等级</TableCell>
+                <TableCell width="24%">具体描述</TableCell>
+                <TableCell width="16%">涉及规范</TableCell>
+                <TableCell width="22%">整改建议</TableCell>
+                <TableCell width="6%" align="right">预算经费</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -537,6 +522,23 @@ function ResultTable({ hazards, scenario, imagePreview }) {
                     >
                       {String(i + 1).padStart(2, '0')}
                     </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    {imagePreview && (
+                      <img
+                        src={imagePreview}
+                        alt={`隐患 ${i + 1} 现场照片`}
+                        style={{
+                          width: '100%',
+                          maxWidth: 80,
+                          height: 56,
+                          objectFit: 'cover',
+                          borderRadius: 4,
+                          border: '1px solid rgba(15,23,42,0.08)',
+                          display: 'block',
+                        }}
+                      />
+                    )}
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" fontWeight={700} sx={{ lineHeight: 1.4 }}>
@@ -577,7 +579,7 @@ function ResultTable({ hazards, scenario, imagePreview }) {
                     <Typography
                       className="font-mono-num"
                       sx={{
-                        fontSize: '0.85rem',
+                        fontSize: '0.72rem',
                         fontWeight: 700,
                         color: 'primary.main',
                         whiteSpace: 'nowrap',
@@ -599,6 +601,19 @@ function ResultTable({ hazards, scenario, imagePreview }) {
           <HazardCard key={i} hazard={hazard} index={i} />
         ))}
       </Box>
+
+      {/* ───────── 底部 AI 免责说明(共用) ───────── */}
+      <Typography
+        sx={{
+          mt: 2,
+          textAlign: 'center',
+          fontSize: { xs: '0.7rem', md: '0.75rem' },
+          color: 'text.secondary',
+          fontStyle: 'italic',
+        }}
+      >
+        以上由 AI 大模型分析识别,仅供辅助参考
+      </Typography>
 
       {/* 复制成功提示 */}
       <Snackbar
