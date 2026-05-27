@@ -103,7 +103,7 @@ hazard-detect/
 ├── lib/
 │   ├── db.js              # better-sqlite3 + schema
 │   ├── session.js         # iron-session 配置
-│   └── prompts.js         # 36 场景检查清单 + buildSystemPrompt + parseResult
+│   └── prompts.js         # buildSystemPrompt / parseResult（数据从 data/prompts.json 读）
 ├── src/
 │   ├── App.jsx            # 主组件（登录态切换）
 │   ├── main.jsx
@@ -115,7 +115,11 @@ hazard-detect/
 │   ├── styles/
 │   └── utils/
 │       └── api.js         # 前端 API 客户端（fetchMe / login / analyze）
-├── data/                  # SQLite 数据（gitignored）
+├── data/                  # SQLite + prompts.json 运行时数据（gitignored）
+│   ├── prompts.json       # 36 场景检查清单运行时数据（由 admin-hub 维护，不要手改）
+│   └── prompts.seed.json  # 首次部署种子（进 git；cp 一份成 prompts.json）
+├── scripts/
+│   └── export-prompts.mjs # 一次性脚本：把硬编码 prompts 导出到 JSON（已跑过）
 ├── docs/                  # 原作者笔记（仅参考）
 ├── .env.local             # 本地 dev 配置（gitignored）
 └── .env.local.example
