@@ -305,11 +305,11 @@ function HazardCard({ hazard, index }) {
 
 function ResultTable({ hazards, scenario, imagePreview }) {
   const hazardList = Array.isArray(hazards) ? hazards : [hazards]
-  const now = new Date().toLocaleString('zh-CN', {
-    month: 'numeric', day: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-    hour12: false,
-  })
+  const now = (() => {
+    const d = new Date()
+    const pad = n => String(n).padStart(2, '0')
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+  })()
   const [copySnack, setCopySnack] = useState(false)
 
   const levelCounts = hazardList.reduce((acc, h) => {
@@ -615,7 +615,8 @@ function ResultTable({ hazards, scenario, imagePreview }) {
                         fontSize: '0.72rem',
                         fontWeight: 700,
                         color: 'primary.main',
-                        whiteSpace: 'nowrap',
+                        wordBreak: 'break-word',
+                        lineHeight: 1.4,
                       }}
                     >
                       {stripYuan(hazard.estimated_budget)}
