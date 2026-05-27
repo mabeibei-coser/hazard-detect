@@ -74,6 +74,9 @@ const SCENARIO_NAMES = {
   food_processing: '食品加工车间',
 }
 
+// 预算字段末尾常带"元"单位,显示时去掉(如"¥0 - 500 元" → "¥0 - 500")
+const stripYuan = (text) => (text || '').toString().replace(/\s*元\s*$/, '').trim()
+
 // ───────── 共用子组件 ─────────
 
 function LevelBadge({ level, size = 'sm' }) {
@@ -176,7 +179,7 @@ function HazardCard({ hazard, index }) {
             mt: '2px',
           }}
         >
-          {String(index + 1).padStart(2, '0')}
+          {index + 1}
         </Typography>
 
         {/* 标题 + 等级 badge(标题在上,badge 在下) */}
@@ -291,7 +294,7 @@ function HazardCard({ hazard, index }) {
             textWrap: 'pretty',
           }}
         >
-          {hazard.estimated_budget}
+          {stripYuan(hazard.estimated_budget)}
         </Typography>
       </Box>
     </Box>
@@ -387,59 +390,95 @@ function ResultTable({ hazards, scenario, imagePreview }) {
           </Typography>
         </Box>
 
-        {/* 等级分布条 + 元数据(单行可换行) */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-          {['高', '中', '低'].map(lvl => {
-            const count = levelCounts[lvl] || 0
-            if (count === 0) return null
-            const d = LEVEL_DESIGN[lvl]
-            return (
-              <Box
-                key={lvl}
-                sx={{
-                  display: 'inline-flex',
-                  alignItems: 'baseline',
-                  gap: 0.625,
-                  px: 1.125,
-                  py: 0.5,
-                  borderRadius: 1,
-                  backgroundColor: d.bg,
-                  color: d.text,
-                }}
-              >
-                <Typography
-                  className="font-mono-num"
+        {/* 等级分布条 + 元数据 + 桌面端操作按钮(同一行,按钮靠右) */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: { xs: 'flex-start', md: 'center' },
+            justifyContent: 'space-between',
+            gap: 1.5,
+            flexWrap: { xs: 'wrap', md: 'nowrap' },
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', flex: 1, minWidth: 0 }}>
+            {['高', '中', '低'].map(lvl => {
+              const count = levelCounts[lvl] || 0
+              if (count === 0) return null
+              const d = LEVEL_DESIGN[lvl]
+              return (
+                <Box
+                  key={lvl}
                   sx={{
-                    fontSize: '1.0625rem',
-                    fontWeight: 700,
-                    lineHeight: 1,
-                    letterSpacing: '-0.02em',
+                    display: 'inline-flex',
+                    alignItems: 'baseline',
+                    gap: 0.625,
+                    px: 1.125,
+                    py: 0.5,
+                    borderRadius: 1,
+                    backgroundColor: d.bg,
+                    color: d.text,
                   }}
                 >
-                  {count}
-                </Typography>
-                <Typography sx={{ fontSize: '0.7rem', fontWeight: 600, lineHeight: 1 }}>
-                  {lvl}风险
-                </Typography>
-              </Box>
-            )
-          })}
-          <Typography
-            sx={{
-              fontSize: { xs: '0.75rem', md: '0.8125rem' },
-              color: 'text.secondary',
-              ml: { xs: 0, md: 0.5 },
-            }}
-          >
-            {SCENARIO_NAMES[scenario] || '通用'} · {now}
-          </Typography>
+                  <Typography
+                    className="font-mono-num"
+                    sx={{
+                      fontSize: '1.0625rem',
+                      fontWeight: 700,
+                      lineHeight: 1,
+                      letterSpacing: '-0.02em',
+                    }}
+                  >
+                    {count}
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.7rem', fontWeight: 600, lineHeight: 1 }}>
+                    {lvl}风险
+                  </Typography>
+                </Box>
+              )
+            })}
+            <Typography
+              sx={{
+                fontSize: { xs: '0.75rem', md: '0.8125rem' },
+                color: 'text.secondary',
+                ml: { xs: 0, md: 0.5 },
+              }}
+            >
+              {SCENARIO_NAMES[scenario] || '通用'} · {now}
+            </Typography>
+          </Box>
+
+          {/* 桌面端按钮:与等级分布同行靠右 */}
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, flexShrink: 0 }}>
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<DownloadIcon />}
+              onClick={handleDownloadExcel}
+              sx={{
+                py: 0.5,
+                backgroundColor: 'primary.main',
+                '&:hover': { backgroundColor: 'primary.dark' },
+              }}
+            >
+              下载台账
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<ContentCopyIcon />}
+              onClick={handleCopy}
+              sx={{ py: 0.5 }}
+            >
+              复制报告
+            </Button>
+          </Box>
         </Box>
       </Box>
 
-      {/* ───────── 操作按钮(手机平分宽度;桌面靠左) ───────── */}
+      {/* ───────── 手机端操作按钮(平分宽度,单独一行) ───────── */}
       <Box
         sx={{
-          display: 'flex',
+          display: { xs: 'flex', md: 'none' },
           gap: 1,
           mb: 2,
         }}
@@ -450,8 +489,8 @@ function ResultTable({ hazards, scenario, imagePreview }) {
           startIcon={<DownloadIcon />}
           onClick={handleDownloadExcel}
           sx={{
-            flex: { xs: 1, md: 'none' },
-            py: { xs: 0.875, md: 0.5 },
+            flex: 1,
+            py: 0.875,
             backgroundColor: 'primary.main',
             '&:hover': { backgroundColor: 'primary.dark' },
           }}
@@ -463,10 +502,7 @@ function ResultTable({ hazards, scenario, imagePreview }) {
           size="small"
           startIcon={<ContentCopyIcon />}
           onClick={handleCopy}
-          sx={{
-            flex: { xs: 1, md: 'none' },
-            py: { xs: 0.875, md: 0.5 },
-          }}
+          sx={{ flex: 1, py: 0.875 }}
         >
           复制报告
         </Button>
@@ -503,10 +539,9 @@ function ResultTable({ hazards, scenario, imagePreview }) {
             <TableHead>
               <TableRow sx={{ backgroundColor: '#f8fafc' }}>
                 <TableCell width="4%" align="center">#</TableCell>
-                <TableCell width="8%" align="center">现场照片</TableCell>
-                <TableCell width="13%">隐患名称</TableCell>
+                <TableCell width="20%">隐患名称</TableCell>
                 <TableCell width="7%">等级</TableCell>
-                <TableCell width="24%">具体描述</TableCell>
+                <TableCell width="25%">具体描述</TableCell>
                 <TableCell width="16%">涉及规范</TableCell>
                 <TableCell width="22%">整改建议</TableCell>
                 <TableCell width="6%" align="right">预算经费</TableCell>
@@ -520,18 +555,21 @@ function ResultTable({ hazards, scenario, imagePreview }) {
                       className="font-mono-num"
                       sx={{ fontSize: '0.85rem', fontWeight: 700, color: '#475569' }}
                     >
-                      {String(i + 1).padStart(2, '0')}
+                      {i + 1}
                     </Typography>
                   </TableCell>
-                  <TableCell align="center">
+                  <TableCell>
+                    <Typography variant="body2" fontWeight={700} sx={{ lineHeight: 1.4, mb: imagePreview ? 1 : 0 }}>
+                      {hazard.hazard_name}
+                    </Typography>
                     {imagePreview && (
                       <img
                         src={imagePreview}
                         alt={`隐患 ${i + 1} 现场照片`}
                         style={{
                           width: '100%',
-                          maxWidth: 80,
-                          height: 56,
+                          maxWidth: 120,
+                          height: 80,
                           objectFit: 'cover',
                           borderRadius: 4,
                           border: '1px solid rgba(15,23,42,0.08)',
@@ -539,11 +577,6 @@ function ResultTable({ hazards, scenario, imagePreview }) {
                         }}
                       />
                     )}
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" fontWeight={700} sx={{ lineHeight: 1.4 }}>
-                      {hazard.hazard_name}
-                    </Typography>
                   </TableCell>
                   <TableCell><LevelBadge level={hazard.hazard_level} /></TableCell>
                   <TableCell>
@@ -585,7 +618,7 @@ function ResultTable({ hazards, scenario, imagePreview }) {
                         whiteSpace: 'nowrap',
                       }}
                     >
-                      {hazard.estimated_budget}
+                      {stripYuan(hazard.estimated_budget)}
                     </Typography>
                   </TableCell>
                 </TableRow>
