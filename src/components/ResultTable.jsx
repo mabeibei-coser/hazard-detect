@@ -544,7 +544,7 @@ function ResultTable({ hazards, scenario, imagePreview }) {
                 <TableCell width="25%">具体描述</TableCell>
                 <TableCell width="16%">涉及规范</TableCell>
                 <TableCell width="22%">整改建议</TableCell>
-                <TableCell width="6%" align="right">预算经费</TableCell>
+                <TableCell sx={{ width: 96, minWidth: 96, maxWidth: 96 }} align="right">预算经费</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -608,7 +608,7 @@ function ResultTable({ hazards, scenario, imagePreview }) {
                       ))}
                     </Box>
                   </TableCell>
-                  <TableCell align="right">
+                  <TableCell sx={{ width: 96, minWidth: 96, maxWidth: 96 }} align="right">
                     <Typography
                       className="font-mono-num"
                       sx={{
