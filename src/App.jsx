@@ -5,13 +5,13 @@ import {
 } from '@mui/material'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import SearchIcon from '@mui/icons-material/Search'
-import LogoutIcon from '@mui/icons-material/Logout'
+import LoginIcon from '@mui/icons-material/Login'
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium'
 import './styles/index.css'
 import ScenarioDropdown from './components/ScenarioDropdown'
 import ImageUploader from './components/ImageUploader'
 import ResultTable from './components/ResultTable'
-import LoginForm from './components/LoginForm'
-import { analyzeHazard, fetchMe, logout } from './utils/api'
+import { analyzeHazard, fetchMe, gotoCenterLogin, CENTER_URL } from './utils/api'
 
 function App() {
   const [me, setMe] = useState(null)
@@ -86,12 +86,6 @@ function App() {
     setError(null)
   }
 
-  const handleLogout = async () => {
-    try { await logout() } catch { /* ignore */ }
-    setMe(null)
-    handleReset()
-  }
-
   if (!meReady) {
     return (
       <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f4f6f9' }}>
@@ -100,6 +94,7 @@ function App() {
     )
   }
 
+  // 未登录：引导去会员中心登录（A600 不再自己登录）
   if (!me) {
     return (
       <Box sx={{ minHeight: '100vh', py: { xs: 6, md: 10 }, backgroundColor: '#f4f6f9' }}>
@@ -112,7 +107,17 @@ function App() {
               请先登录以使用隐患识别功能
             </Typography>
           </Box>
-          <LoginForm onLoggedIn={(data) => setMe(data)} />
+          <Paper className="glass-card" sx={{ maxWidth: 420, mx: 'auto', p: { xs: 3, md: 4 }, textAlign: 'center' }}>
+            <Typography variant="body2" sx={{ color: '#64748b', mb: 3 }}>
+              本平台使用统一会员账号，点击下方按钮前往登录，登录后自动返回
+            </Typography>
+            <Button
+              variant="contained" size="large" startIcon={<LoginIcon />} onClick={gotoCenterLogin}
+              sx={{ px: 4, py: 1.5, background: '#1e3a5f', '&:hover': { background: '#2c5282' } }}
+            >
+              前往登录 / 注册
+            </Button>
+          </Paper>
         </Container>
       </Box>
     )
@@ -121,14 +126,21 @@ function App() {
   return (
     <Box sx={{ minHeight: '100vh', py: { xs: 2, md: 4 }, backgroundColor: '#f4f6f9' }}>
       <Container maxWidth="lg">
-        {/* 顶部：手机号 + 退出（右上角小角标，桌面/手机一致） */}
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 0.5, mb: 1 }}>
+        {/* 顶部：手机号 + VIP 角标 + 会员中心入口 */}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 0.75, mb: 1 }}>
+          {me.isVip && (
+            <Chip
+              icon={<WorkspacePremiumIcon sx={{ fontSize: 14, color: '#f59e0b !important' }} />}
+              label="VIP" size="small"
+              sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700, bgcolor: '#1e3a5f', color: '#fff' }}
+            />
+          )}
           <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.75rem' }}>
             {me.phone}
           </Typography>
-          <Tooltip title="退出登录">
-            <IconButton size="small" onClick={handleLogout} sx={{ color: '#94a3b8', p: 0.5 }}>
-              <LogoutIcon sx={{ fontSize: 16 }} />
+          <Tooltip title="会员中心">
+            <IconButton size="small" onClick={() => { window.location.href = CENTER_URL }} sx={{ color: '#94a3b8', p: 0.5 }}>
+              <WorkspacePremiumIcon sx={{ fontSize: 16 }} />
             </IconButton>
           </Tooltip>
         </Box>
@@ -215,7 +227,7 @@ function App() {
 
         {hazards && (
           <Box className="fade-in-up">
-            <ResultTable hazards={hazards} scenario={selectedScenario} imagePreview={imagePreview} />
+            <ResultTable hazards={hazards} scenario={selectedScenario} imagePreview={imagePreview} isVip={me.isVip} />
           </Box>
         )}
       </Container>
