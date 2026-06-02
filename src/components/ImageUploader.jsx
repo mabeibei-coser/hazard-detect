@@ -31,7 +31,7 @@ function ImageUploader({ onImageSelect, imagePreview }) {
               position: 'absolute', top: 8, right: 8,
               minWidth: 32, width: 32, height: 32, borderRadius: '50%',
               backgroundColor: 'rgba(0,0,0,0.5)', color: '#fff',
-              '&:hover': { backgroundColor: '#c62828' }
+              '&:hover': { backgroundColor: 'var(--danger)' }
             }}
           >
             <CloseIcon fontSize="small" />
@@ -43,7 +43,7 @@ function ImageUploader({ onImageSelect, imagePreview }) {
             border: '2px dashed', borderColor: 'divider', borderRadius: 2,
             p: { xs: 3, md: 5 }, textAlign: 'center',
             transition: 'all 0.3s',
-            '&:hover': { borderColor: 'primary.main', backgroundColor: 'rgba(30,58,95,0.02)' }
+            '&:hover': { borderColor: 'primary.main', backgroundColor: 'rgba(15,118,110,0.04)' }
           }}
         >
           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />

@@ -1,10 +1,12 @@
 /**
  * hazard-detect API 客户端
- * 改造后：浏览器 → /api/analyze → Express → 讯飞 multimodal → 入库 → 返回隐患数组
- * （原来直连 /llm-api + 浏览器持 API key 的写法已废弃）
+ * 浏览器 → /api/analyze → Express → 讯飞 multimodal → 入库 → 返回隐患数组
+ * 登录态来自「安全隐患域会员中心」的共享 cookie；A600 自己不再登录。
  */
 
 const API_BASE = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/api`;
+// 会员中心前台地址（开通 VIP / 登录都跳这里）。生产由 VITE_CENTER_URL 注入。
+export const CENTER_URL = import.meta.env.VITE_CENTER_URL || 'http://localhost:4002/';
 
 async function http(method, path, body) {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -17,11 +19,13 @@ async function http(method, path, body) {
   if (!res.ok) {
     const err = new Error(data?.error || `请求失败 (${res.status})`);
     err.status = res.status;
+    err.data = data;
     throw err;
   }
   return data;
 }
 
+// 当前用户：{ phone, isVip, vipExpireAt }，未登录返 null
 export async function fetchMe() {
   try {
     return await http('GET', '/me');
@@ -31,12 +35,15 @@ export async function fetchMe() {
   }
 }
 
-export async function loginByPhone(phone) {
-  return http('POST', '/login', { phone });
+// 跳会员中心登录，登录完回到当前页
+export function gotoCenterLogin() {
+  const back = encodeURIComponent(window.location.href);
+  window.location.href = `${CENTER_URL}?from=${back}`;
 }
 
-export async function logout() {
-  return http('POST', '/logout');
+// 台账下载授权：VIP 才返回 ok，否则抛 needVip 错误
+export async function authorizeLedger() {
+  return http('GET', '/ledger/authorize');
 }
 
 // 图片压缩（浏览器端）：1024px 最大边 + JPEG 0.8
@@ -92,4 +99,4 @@ export const analyzeHazard = async (imageFile, scenario) => {
   }
 };
 
-export default { analyzeHazard, loginByPhone, logout, fetchMe };
+export default { analyzeHazard, fetchMe, gotoCenterLogin, authorizeLedger, CENTER_URL };

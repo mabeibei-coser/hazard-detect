@@ -5,7 +5,9 @@ import {
 } from '@mui/material'
 import DownloadIcon from '@mui/icons-material/Download'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
+import LockIcon from '@mui/icons-material/Lock'
 import * as XLSX from 'xlsx'
+import { authorizeLedger, CENTER_URL } from '../utils/api'
 
 // 等级设计 token:统一控制桌面/手机/头部的等级配色
 const LEVEL_DESIGN = {
@@ -112,11 +114,11 @@ function SectionLabel({ children }) {
         display: 'inline-block',
         fontSize: '0.8125rem',
         fontWeight: 700,
-        color: '#0f172a',
+        color: 'var(--ink)',
         letterSpacing: 0,
         mb: 0.875,
         pb: 0.375,
-        borderBottom: '2px solid #1e3a5f',
+        borderBottom: '2px solid var(--accent)',
       }}
     >
       {children}
@@ -188,7 +190,7 @@ function HazardCard({ hazard, index }) {
             sx={{
               fontSize: '1.3125rem',
               fontWeight: 800,
-              color: '#0f172a',
+              color: 'var(--ink)',
               lineHeight: 1.25,
               letterSpacing: '-0.02em',
               textWrap: 'balance',
@@ -303,7 +305,7 @@ function HazardCard({ hazard, index }) {
 
 // ───────── 主组件 ─────────
 
-function ResultTable({ hazards, scenario, imagePreview }) {
+function ResultTable({ hazards, scenario, imagePreview, isVip }) {
   const hazardList = Array.isArray(hazards) ? hazards : [hazards]
   const now = (() => {
     const d = new Date()
@@ -311,6 +313,8 @@ function ResultTable({ hazards, scenario, imagePreview }) {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
   })()
   const [copySnack, setCopySnack] = useState(false)
+  const [vipSnack, setVipSnack] = useState(false)
+  const [downloading, setDownloading] = useState(false)
 
   const levelCounts = hazardList.reduce((acc, h) => {
     const lvl = h.hazard_level || '中'
@@ -318,7 +322,27 @@ function ResultTable({ hazards, scenario, imagePreview }) {
     return acc
   }, {})
 
-  const handleDownloadExcel = () => {
+  // 台账下载：先向后端确认 VIP（后端权威，前端不能伪造），通过才生成 Excel
+  const handleDownloadExcel = async () => {
+    if (downloading) return
+    setDownloading(true)
+    try {
+      await authorizeLedger()
+    } catch (err) {
+      if (err.status === 403 || err.data?.needVip) {
+        setVipSnack(true)
+        setDownloading(false)
+        return
+      }
+      // 其他错误（如未登录）也拦下，不生成
+      setDownloading(false)
+      return
+    }
+    setDownloading(false)
+    generateExcel()
+  }
+
+  const generateExcel = () => {
     const excelData = hazardList.map((h, i) => ({
       '序号': i + 1,
       '隐患名称': h.hazard_name,
@@ -452,15 +476,16 @@ function ResultTable({ hazards, scenario, imagePreview }) {
             <Button
               variant="contained"
               size="small"
-              startIcon={<DownloadIcon />}
+              startIcon={isVip ? <DownloadIcon /> : <LockIcon />}
               onClick={handleDownloadExcel}
+              disabled={downloading}
               sx={{
                 py: 0.5,
                 backgroundColor: 'primary.main',
                 '&:hover': { backgroundColor: 'primary.dark' },
               }}
             >
-              下载台账
+              下载台账{isVip ? '' : ' · VIP'}
             </Button>
             <Button
               variant="outlined"
@@ -486,8 +511,9 @@ function ResultTable({ hazards, scenario, imagePreview }) {
         <Button
           variant="contained"
           size="small"
-          startIcon={<DownloadIcon />}
+          startIcon={isVip ? <DownloadIcon /> : <LockIcon />}
           onClick={handleDownloadExcel}
+          disabled={downloading}
           sx={{
             flex: 1,
             py: 0.875,
@@ -495,7 +521,7 @@ function ResultTable({ hazards, scenario, imagePreview }) {
             '&:hover': { backgroundColor: 'primary.dark' },
           }}
         >
-          下载台账
+          下载台账{isVip ? '' : ' · VIP'}
         </Button>
         <Button
           variant="outlined"
@@ -537,7 +563,7 @@ function ResultTable({ hazards, scenario, imagePreview }) {
             }}
           >
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#f8fafc' }}>
+              <TableRow sx={{ backgroundColor: 'var(--bg-mute)' }}>
                 <TableCell width="4%" align="center">#</TableCell>
                 <TableCell width="20%">隐患名称</TableCell>
                 <TableCell width="7%">等级</TableCell>
@@ -663,6 +689,28 @@ function ResultTable({ hazards, scenario, imagePreview }) {
           sx={{ borderRadius: 2 }}
         >
           报告已复制到剪贴板
+        </Alert>
+      </Snackbar>
+
+      {/* 非 VIP 点下载台账：引导开通 */}
+      <Snackbar
+        open={vipSnack}
+        autoHideDuration={5000}
+        onClose={() => setVipSnack(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          severity="warning"
+          variant="filled"
+          onClose={() => setVipSnack(false)}
+          sx={{ borderRadius: 2 }}
+          action={
+            <Button color="inherit" size="small" onClick={() => { window.location.href = CENTER_URL }}>
+              去开通
+            </Button>
+          }
+        >
+          下载台账为 VIP 会员专享
         </Alert>
       </Snackbar>
     </Paper>

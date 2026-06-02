@@ -181,8 +181,8 @@ function ScenarioDropdown({ value, onChange }) {
               key={group.key}
               onClick={(e) => handleGroupClick(group.key, e)}
               sx={{
-                backgroundColor: isCurrent ? '#f0f4ff' : 'transparent',
-                '&:hover': { backgroundColor: '#f5f6f8' },
+                backgroundColor: isCurrent ? 'rgba(15,118,110,0.08)' : 'transparent',
+                '&:hover': { backgroundColor: 'var(--bg-mute)' },
                 display: 'flex', justifyContent: 'space-between',
               }}
             >
@@ -220,7 +220,7 @@ function ScenarioDropdown({ value, onChange }) {
                 sx={{
                   borderLeft: isSelected ? '3px solid' : '3px solid transparent',
                   borderLeftColor: isSelected ? 'primary.main' : 'transparent',
-                  backgroundColor: isSelected ? '#e8edf5' : 'transparent',
+                  backgroundColor: isSelected ? 'rgba(15,118,110,0.08)' : 'transparent',
                 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -244,12 +244,12 @@ function ScenarioDropdown({ value, onChange }) {
         fullScreen
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
-        PaperProps={{ sx: { backgroundColor: '#f4f6f9' } }}
+        PaperProps={{ sx: { backgroundColor: 'var(--bg)' } }}
       >
         <DialogTitle
           sx={{
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            backgroundColor: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)',
+            backgroundColor: '#fff', borderBottom: '1px solid var(--line)',
             py: 1.5, px: 2,
           }}
         >
@@ -264,7 +264,7 @@ function ScenarioDropdown({ value, onChange }) {
               <Box key={group.key}>
                 <ListSubheader
                   sx={{
-                    backgroundColor: '#f4f6f9',
+                    backgroundColor: 'var(--bg-mute)',
                     fontWeight: 600,
                     color: 'text.primary',
                     fontSize: '0.8rem',
@@ -282,11 +282,11 @@ function ScenarioDropdown({ value, onChange }) {
                       key={item.id}
                       onClick={() => handleMobileSelect(item.id)}
                       sx={{
-                        backgroundColor: isSelected ? '#e8edf5' : '#fff',
+                        backgroundColor: isSelected ? 'rgba(15,118,110,0.08)' : '#fff',
                         borderLeft: '3px solid',
                         borderLeftColor: isSelected ? 'primary.main' : 'transparent',
                         py: 1.25, px: 2,
-                        '&:hover': { backgroundColor: isSelected ? '#e8edf5' : '#f8fafc' },
+                        '&:hover': { backgroundColor: isSelected ? 'rgba(15,118,110,0.08)' : 'var(--bg-mute)' },
                       }}
                     >
                       <ListItemIcon sx={{ minWidth: 36 }}>
