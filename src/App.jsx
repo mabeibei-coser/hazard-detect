@@ -13,6 +13,9 @@ import ImageUploader from './components/ImageUploader'
 import ResultTable from './components/ResultTable'
 import { analyzeHazard, fetchMe, gotoCenterLogin, CENTER_URL } from './utils/api'
 
+// 手机号中间 4 位打码：18621933756 → 186****3756
+const maskPhone = (p) => (p ? String(p).replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') : p)
+
 function App() {
   const [me, setMe] = useState(null)
   const [meReady, setMeReady] = useState(false)
@@ -136,7 +139,7 @@ function App() {
             />
           )}
           <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>
-            {me.phone}
+            {maskPhone(me.phone)}
           </Typography>
           <Tooltip title="会员中心">
             <IconButton size="small" onClick={() => { window.location.href = CENTER_URL }} sx={{ color: 'var(--ink-3)', p: 0.5 }}>
