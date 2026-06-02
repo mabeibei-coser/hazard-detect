@@ -114,11 +114,11 @@ function SectionLabel({ children }) {
         display: 'inline-block',
         fontSize: '0.8125rem',
         fontWeight: 700,
-        color: '#0f172a',
+        color: 'var(--ink)',
         letterSpacing: 0,
         mb: 0.875,
         pb: 0.375,
-        borderBottom: '2px solid #1e3a5f',
+        borderBottom: '2px solid var(--accent)',
       }}
     >
       {children}
@@ -190,7 +190,7 @@ function HazardCard({ hazard, index }) {
             sx={{
               fontSize: '1.3125rem',
               fontWeight: 800,
-              color: '#0f172a',
+              color: 'var(--ink)',
               lineHeight: 1.25,
               letterSpacing: '-0.02em',
               textWrap: 'balance',
@@ -563,7 +563,7 @@ function ResultTable({ hazards, scenario, imagePreview, isVip }) {
             }}
           >
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#f8fafc' }}>
+              <TableRow sx={{ backgroundColor: 'var(--bg-mute)' }}>
                 <TableCell width="4%" align="center">#</TableCell>
                 <TableCell width="20%">隐患名称</TableCell>
                 <TableCell width="7%">等级</TableCell>

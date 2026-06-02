@@ -4,19 +4,25 @@ import { ThemeProvider, createTheme, CssBaseline } from '@mui/material'
 import App from './App.jsx'
 import './styles/index.css'
 
+// MUI theme：与 ASG100 会员中心同一套设计语言 v2（暖白纸感 + 深青绿 + 墨黑 + VIP 古金）
+// 颜色与 src/styles/index.css 的 CSS var 保持同步
 const theme = createTheme({
   palette: {
     mode: 'light',
-    primary: { main: '#1e3a5f' },
-    secondary: { main: '#475569' },
-    background: { default: '#f4f6f9', paper: '#ffffff' },
-    text: { primary: '#1a1a2e', secondary: '#64748b' },
+    primary: { main: '#0f766e', dark: '#0d6660', light: '#ccfbf1', contrastText: '#ffffff' },
+    secondary: { main: '#525866' },
+    success: { main: '#2f8559', dark: '#1f6344', light: '#e7f3ec', contrastText: '#ffffff' },
+    warning: { main: '#b08a3e', dark: '#8a6c2f', light: '#fdf6e4', contrastText: '#ffffff' },
+    error: { main: '#b8472d', light: '#fce8e1', contrastText: '#ffffff' },
+    background: { default: '#fafaf7', paper: '#ffffff' },
+    text: { primary: '#0f1419', secondary: '#525866', disabled: '#9098a5' },
+    divider: '#e6e6e1',
   },
   typography: {
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', system-ui, 'Inter', 'Noto Sans SC', sans-serif",
-    h4: { fontWeight: 700, letterSpacing: '-0.02em' },
-    h5: { fontWeight: 600, letterSpacing: '-0.01em' },
-    h6: { fontWeight: 600, letterSpacing: '-0.01em' },
+    fontFamily: "'Inter Tight', 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, sans-serif",
+    h4: { fontWeight: 700, letterSpacing: '-0.025em' },
+    h5: { fontWeight: 650, letterSpacing: '-0.018em' },
+    h6: { fontWeight: 600, letterSpacing: '-0.012em' },
   },
   components: {
     MuiOutlinedInput: {
@@ -41,7 +47,7 @@ const theme = createTheme({
     },
     MuiTableCell: {
       styleOverrides: {
-        head: { fontWeight: 700, fontSize: '0.875rem', color: '#1a1a2e' }
+        head: { fontWeight: 700, fontSize: '0.875rem', color: '#0f1419' }
       }
     }
   },
