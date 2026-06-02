@@ -11,10 +11,14 @@ import './styles/index.css'
 import ScenarioDropdown from './components/ScenarioDropdown'
 import ImageUploader from './components/ImageUploader'
 import ResultTable from './components/ResultTable'
+import BottomNav from './components/BottomNav'
 import { analyzeHazard, fetchMe, gotoCenterLogin, CENTER_URL } from './utils/api'
 
-// 手机号中间 4 位打码：18621933756 → 186****3756
-const maskPhone = (p) => (p ? String(p).replace(/(\d{3})\d{4}(\d{4})/, '$1****$2') : p)
+// 手机号脱敏：前留 3 位、后留 2 位、中间全打码 → 18621933756 → 186******56
+const maskPhone = (p) => {
+  const s = p ? String(p) : ''
+  return s.length >= 5 ? s.slice(0, 3) + '*'.repeat(s.length - 5) + s.slice(-2) : s
+}
 
 function App() {
   const [me, setMe] = useState(null)
@@ -89,18 +93,24 @@ function App() {
     setError(null)
   }
 
+  // 悬浮底部导航：首页 = 回本应用首页（重置 + 回到顶部）；我的 = 去会员中心
+  const goHome = () => {
+    handleReset()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+  const goMine = () => { window.location.href = CENTER_URL }
+
+  let content
   if (!meReady) {
-    return (
+    content = (
       <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <CircularProgress size={32} sx={{ color: 'primary.main' }} />
       </Box>
     )
-  }
-
-  // 未登录：引导去会员中心登录（A600 不再自己登录）
-  if (!me) {
-    return (
-      <Box sx={{ minHeight: '100vh', py: { xs: 6, md: 10 } }}>
+  } else if (!me) {
+    // 未登录：引导去会员中心登录（A600 不再自己登录）
+    content = (
+      <Box sx={{ minHeight: '100vh', py: { xs: 6, md: 10 }, pb: { xs: 11, md: 12 } }}>
         <Container maxWidth="sm">
           <Box sx={{ textAlign: 'center', mb: 4 }}>
             <Typography variant="h4" color="primary.main" sx={{ fontWeight: 700, mb: 1 }}>
@@ -124,10 +134,9 @@ function App() {
         </Container>
       </Box>
     )
-  }
-
-  return (
-    <Box sx={{ minHeight: '100vh', py: { xs: 2, md: 4 } }}>
+  } else {
+    content = (
+    <Box sx={{ minHeight: '100vh', pt: { xs: 2, md: 4 }, pb: { xs: 11, md: 12 } }}>
       <Container maxWidth="lg">
         {/* 顶部：手机号 + VIP 角标 + 会员中心入口 */}
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 0.75, mb: 1 }}>
@@ -244,6 +253,14 @@ function App() {
         </Typography>
       </Box>
     </Box>
+    )
+  }
+
+  return (
+    <>
+      {content}
+      <BottomNav onHome={goHome} onMine={goMine} />
+    </>
   )
 }
 
