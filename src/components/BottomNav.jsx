@@ -1,10 +1,11 @@
 import { Paper, BottomNavigation, BottomNavigationAction } from '@mui/material'
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded'
+import HistoryRoundedIcon from '@mui/icons-material/HistoryRounded'
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded'
 
-// 全站悬浮底部导航：首页（回本应用首页）+ 我的（去会员中心）
+// 全站悬浮底部导航：首页（回本应用首页）+ 记录（去会员中心识别历史）+ 我的（去会员中心个人页）
 // 永远固定在视口底部，三个视图态都显示。本应用即「首页」，故首页常驻选中。
-export default function BottomNav({ onHome, onMine }) {
+export default function BottomNav({ onHome, onHistory, onMine }) {
   return (
     <Paper
       elevation={0}
@@ -33,6 +34,7 @@ export default function BottomNav({ onHome, onMine }) {
         }}
       >
         <BottomNavigationAction label="首页" icon={<HomeRoundedIcon />} onClick={onHome} />
+        <BottomNavigationAction label="记录" icon={<HistoryRoundedIcon />} onClick={onHistory} />
         <BottomNavigationAction label="我的" icon={<PersonRoundedIcon />} onClick={onMine} />
       </BottomNavigation>
     </Paper>

@@ -93,11 +93,12 @@ function App() {
     setError(null)
   }
 
-  // 悬浮底部导航：首页 = 回本应用首页（重置 + 回到顶部）；我的 = 去会员中心
+  // 悬浮底部导航：首页 = 回本应用首页（重置 + 回到顶部）；记录 = 会员中心识别历史；我的 = 去会员中心
   const goHome = () => {
     handleReset()
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
+  const goHistory = () => { window.location.href = `${CENTER_URL}?view=history` }
   const goMine = () => { window.location.href = CENTER_URL }
 
   let content
@@ -150,11 +151,13 @@ function App() {
           <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>
             {maskPhone(me.phone)}
           </Typography>
-          <Tooltip title="会员中心">
-            <IconButton size="small" onClick={() => { window.location.href = CENTER_URL }} sx={{ color: 'var(--ink-3)', p: 0.5 }}>
-              <WorkspacePremiumIcon sx={{ fontSize: 16 }} />
-            </IconButton>
-          </Tooltip>
+          {!me.isVip && (
+            <Tooltip title="会员中心">
+              <IconButton size="small" onClick={() => { window.location.href = CENTER_URL }} sx={{ color: 'var(--ink-3)', p: 0.5 }}>
+                <WorkspacePremiumIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
 
         {/* 标题块：永远 prominent 居中 */}
@@ -259,7 +262,7 @@ function App() {
   return (
     <>
       {content}
-      <BottomNav onHome={goHome} onMine={goMine} />
+      <BottomNav onHome={goHome} onHistory={goHistory} onMine={goMine} />
     </>
   )
 }
