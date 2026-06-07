@@ -6,8 +6,7 @@ import {
 import DownloadIcon from '@mui/icons-material/Download'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import LockIcon from '@mui/icons-material/Lock'
-import * as XLSX from 'xlsx'
-import { authorizeLedger, CENTER_URL } from '../utils/api'
+import { prepareLedgerDownload, ledgerDownloadUrl, CENTER_URL } from '../utils/api'
 
 // 等级设计 token:统一控制桌面/手机/头部的等级配色
 const LEVEL_DESIGN = {
@@ -305,7 +304,7 @@ function HazardCard({ hazard, index }) {
 
 // ───────── 主组件 ─────────
 
-function ResultTable({ hazards, scenario, imagePreview, isVip }) {
+function ResultTable({ hazards, reportId, scenario, imagePreview, isVip }) {
   const hazardList = Array.isArray(hazards) ? hazards : [hazards]
   const now = (() => {
     const d = new Date()
@@ -314,6 +313,7 @@ function ResultTable({ hazards, scenario, imagePreview, isVip }) {
   })()
   const [copySnack, setCopySnack] = useState(false)
   const [vipSnack, setVipSnack] = useState(false)
+  const [errorSnack, setErrorSnack] = useState(null)
   const [downloading, setDownloading] = useState(false)
 
   const levelCounts = hazardList.reduce((acc, h) => {
@@ -322,58 +322,31 @@ function ResultTable({ hazards, scenario, imagePreview, isVip }) {
     return acc
   }, {})
 
-  // 台账下载：先向后端确认 VIP（后端权威，前端不能伪造），通过才生成 Excel
+  // 台账下载：后端生成 xlsx + 签名 token + GET 真实下载链接
+  // 微信内 a[download]+blob 被屏蔽，必须靠真实 HTTP 跳转触发下载。
+  // 1) check=1 拿后端签发的 10 分钟短期 token（这步必须 cookie）
+  // 2) window.location.href 跳真实下载 URL（带 token；微信里弹"用其他浏览器打开"也比静默失败强）
   const handleDownloadExcel = async () => {
     if (downloading) return
+    if (!reportId) {
+      setErrorSnack('报告还未保存，请稍后再试')
+      return
+    }
     setDownloading(true)
     try {
-      await authorizeLedger()
+      const { downloadToken } = await prepareLedgerDownload(reportId)
+      window.location.href = ledgerDownloadUrl(reportId, downloadToken)
     } catch (err) {
       if (err.status === 403 || err.data?.needVip) {
         setVipSnack(true)
-        setDownloading(false)
-        return
+      } else if (err.status === 401) {
+        setErrorSnack('登录已失效，请刷新页面重新登录')
+      } else {
+        setErrorSnack(err.message || '下载失败，请稍后重试')
       }
-      // 其他错误（如未登录）也拦下，不生成
+    } finally {
       setDownloading(false)
-      return
     }
-    setDownloading(false)
-    generateExcel()
-  }
-
-  const generateExcel = () => {
-    const excelData = hazardList.map((h, i) => ({
-      '序号': i + 1,
-      '隐患名称': h.hazard_name,
-      '隐患等级': h.hazard_level + '风险',
-      '具体描述': h.hazard_description,
-      '涉及规范': h.relevant_regulations,
-      '整改建议': h.rectification_suggestions,
-      '预算经费': h.estimated_budget,
-    }))
-    const worksheet = XLSX.utils.json_to_sheet(excelData)
-    worksheet['!cols'] = [
-      { wch: 6 }, { wch: 20 }, { wch: 10 }, { wch: 40 },
-      { wch: 25 }, { wch: 35 }, { wch: 15 },
-    ]
-    const range = XLSX.utils.decode_range(worksheet['!ref'])
-    for (let col = range.s.c; col <= range.e.c; col++) {
-      const addr = XLSX.utils.encode_cell({ r: 0, c: col })
-      if (!worksheet[addr]) continue
-      worksheet[addr].s = {
-        font: { bold: true },
-        fill: { fgColor: { rgb: 'F8FAFC' } },
-        alignment: { horizontal: 'center', vertical: 'center' },
-      }
-    }
-    const workbook = XLSX.utils.book_new()
-    const timestamp = new Date().toLocaleString('zh-CN').replace(/[\/\:\s]/g, '')
-    XLSX.utils.book_append_sheet(workbook, worksheet, '隐患台账')
-    XLSX.writeFile(
-      workbook,
-      `安全隐患台账_${SCENARIO_NAMES[scenario] || '通用'}_${timestamp}.xlsx`
-    )
   }
 
   const handleCopy = async () => {
@@ -711,6 +684,23 @@ function ResultTable({ hazards, scenario, imagePreview, isVip }) {
           }
         >
           下载台账为 VIP 会员专享
+        </Alert>
+      </Snackbar>
+
+      {/* 下载失败/登录失效等错误提示 */}
+      <Snackbar
+        open={!!errorSnack}
+        autoHideDuration={4000}
+        onClose={() => setErrorSnack(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          severity="error"
+          variant="filled"
+          onClose={() => setErrorSnack(null)}
+          sx={{ borderRadius: 2 }}
+        >
+          {errorSnack}
         </Alert>
       </Snackbar>
     </Paper>

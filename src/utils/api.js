@@ -41,9 +41,20 @@ export function gotoCenterLogin() {
   window.location.href = `${CENTER_URL}?from=${back}`;
 }
 
-// 台账下载授权：VIP 才返回 ok，否则抛 needVip 错误
+// 台账下载授权：VIP 才返回 ok，否则抛 needVip 错误（旧路径，新链路用 prepareLedgerDownload）
 export async function authorizeLedger() {
   return http('GET', '/ledger/authorize');
+}
+
+// 准备台账下载：先 check=1 拿后端签发的短期 token（10 分钟）→ 拼到真实下载 URL 上
+// 微信内 a[download]+blob 被屏蔽，必须走「真实 HTTP GET 链接」让用户在浏览器里打开下载
+export async function prepareLedgerDownload(reportId) {
+  return http('GET', `/reports/${reportId}/ledger.xlsx?check=1`);
+}
+
+// 真实下载 URL（带签名 token）。前端 window.location.href 或 <a href> 跳转触发下载
+export function ledgerDownloadUrl(reportId, token) {
+  return `${API_BASE}/reports/${reportId}/ledger.xlsx?dt=${encodeURIComponent(token)}`;
 }
 
 // 图片压缩（浏览器端）：1024px 最大边 + JPEG 0.8
@@ -89,7 +100,7 @@ export const analyzeHazard = async (imageFile, scenario) => {
       err.status = res.status;
       throw err;
     }
-    return data.hazards;
+    return { hazards: data.hazards, reportId: data.reportId };
   } catch (err) {
     clearTimeout(timeoutId);
     if (err.name === 'AbortError') {
@@ -99,4 +110,8 @@ export const analyzeHazard = async (imageFile, scenario) => {
   }
 };
 
-export default { analyzeHazard, fetchMe, gotoCenterLogin, authorizeLedger, CENTER_URL };
+export default {
+  analyzeHazard, fetchMe, gotoCenterLogin,
+  authorizeLedger, prepareLedgerDownload, ledgerDownloadUrl,
+  CENTER_URL,
+};

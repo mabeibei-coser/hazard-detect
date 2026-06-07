@@ -28,6 +28,7 @@ function App() {
   const [selectedScenario, setSelectedScenario] = useState('general')
   const [loading, setLoading] = useState(false)
   const [hazards, setHazards] = useState(null)
+  const [reportId, setReportId] = useState(null)
   const [error, setError] = useState(null)
   const [countdown, setCountdown] = useState(20)
   const timerRef = useRef(null)
@@ -71,7 +72,8 @@ function App() {
     }, 1000)
     try {
       const data = await analyzeHazard(image, selectedScenario)
-      setHazards(data)
+      setHazards(data.hazards)
+      setReportId(data.reportId)
     } catch (err) {
       if (err.status === 401) {
         setMe(null)
@@ -90,6 +92,7 @@ function App() {
     setImagePreview(null)
     setSelectedScenario('general')
     setHazards(null)
+    setReportId(null)
     setError(null)
   }
 
@@ -242,7 +245,7 @@ function App() {
 
         {hazards && (
           <Box className="fade-in-up">
-            <ResultTable hazards={hazards} scenario={selectedScenario} imagePreview={imagePreview} isVip={me.isVip} />
+            <ResultTable hazards={hazards} reportId={reportId} scenario={selectedScenario} imagePreview={imagePreview} isVip={me.isVip} />
           </Box>
         )}
       </Container>
