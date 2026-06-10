@@ -6,7 +6,8 @@ import {
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import SearchIcon from '@mui/icons-material/Search'
 import LoginIcon from '@mui/icons-material/Login'
-import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium'
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
+import StorageRoundedIcon from '@mui/icons-material/StorageRounded'
 import './styles/index.css'
 import ScenarioDropdown from './components/ScenarioDropdown'
 import ImageUploader from './components/ImageUploader'
@@ -14,11 +15,11 @@ import ResultTable from './components/ResultTable'
 import BottomNav from './components/BottomNav'
 import { analyzeHazard, fetchMe, gotoCenterLogin, CENTER_URL } from './utils/api'
 
-// 手机号脱敏：前留 3 位、后留 2 位、中间全打码 → 18621933756 → 186******56
-const maskPhone = (p) => {
-  const s = p ? String(p) : ''
-  return s.length >= 5 ? s.slice(0, 3) + '*'.repeat(s.length - 5) + s.slice(-2) : s
-}
+// 大数据库版本标签：当前年月，跟 ASG100 首页同款
+const dbVersionLabel = (() => {
+  const now = new Date()
+  return `大数据库版本${now.getFullYear()}年${now.getMonth() + 1}月`
+})()
 
 function App() {
   const [me, setMe] = useState(null)
@@ -142,25 +143,34 @@ function App() {
     content = (
     <Box sx={{ minHeight: '100vh', pt: { xs: 2, md: 4 }, pb: { xs: 11, md: 12 } }}>
       <Container maxWidth="lg">
-        {/* 顶部：手机号 + VIP 角标 + 会员中心入口 */}
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 0.75, mb: 1 }}>
-          {me.isVip && (
-            <Chip
-              icon={<WorkspacePremiumIcon sx={{ fontSize: 14, color: 'var(--gold) !important' }} />}
-              label="VIP" size="small"
-              sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700, bgcolor: 'var(--gold-soft)', color: 'var(--gold-ink)' }}
-            />
-          )}
-          <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>
-            {maskPhone(me.phone)}
-          </Typography>
-          {!me.isVip && (
-            <Tooltip title="会员中心">
-              <IconButton size="small" onClick={() => { window.location.href = CENTER_URL }} sx={{ color: 'var(--ink-3)', p: 0.5 }}>
-                <WorkspacePremiumIcon sx={{ fontSize: 16 }} />
-              </IconButton>
-            </Tooltip>
-          )}
+        {/* 顶部：左侧返回首页（回 ASG100 平台） + 右侧大数据库版本标签 */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <Tooltip title="返回首页">
+            <IconButton
+              size="small"
+              onClick={() => { window.location.href = CENTER_URL }}
+              sx={{
+                color: 'var(--ink-3)',
+                p: 0.5,
+                '&:hover': { color: 'var(--accent)', backgroundColor: 'transparent' },
+              }}
+            >
+              <ArrowBackRoundedIcon sx={{ fontSize: 20 }} />
+            </IconButton>
+          </Tooltip>
+          <Chip
+            icon={<StorageRoundedIcon sx={{ fontSize: 13, color: 'var(--accent) !important' }} />}
+            label={dbVersionLabel}
+            size="small"
+            sx={{
+              height: 22,
+              fontSize: '0.72rem',
+              fontWeight: 600,
+              bgcolor: 'var(--accent-soft)',
+              color: 'var(--accent-ink)',
+              '& .MuiChip-icon': { ml: 0.5 },
+            }}
+          />
         </Box>
 
         {/* 标题块：永远 prominent 居中 */}

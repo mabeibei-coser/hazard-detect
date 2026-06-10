@@ -67,7 +67,7 @@ function ImageUploader({ onImageSelect, imagePreview }) {
             </Button>
           </Box>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-            支持 JPG、PNG、WEBP 格式，自动压缩优化
+            35个专业场景，支持电脑/手机使用
           </Typography>
         </Box>
       )}
