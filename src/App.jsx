@@ -7,7 +7,6 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import SearchIcon from '@mui/icons-material/Search'
 import LoginIcon from '@mui/icons-material/Login'
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
-import StorageRoundedIcon from '@mui/icons-material/StorageRounded'
 import './styles/index.css'
 import ScenarioDropdown from './components/ScenarioDropdown'
 import ImageUploader from './components/ImageUploader'
@@ -158,19 +157,12 @@ function App() {
               <ArrowBackRoundedIcon sx={{ fontSize: 20 }} />
             </IconButton>
           </Tooltip>
-          <Chip
-            icon={<StorageRoundedIcon sx={{ fontSize: 13, color: 'var(--accent) !important' }} />}
-            label={dbVersionLabel}
-            size="small"
-            sx={{
-              height: 22,
-              fontSize: '0.72rem',
-              fontWeight: 600,
-              bgcolor: 'var(--accent-soft)',
-              color: 'var(--accent-ink)',
-              '& .MuiChip-icon': { ml: 0.5 },
-            }}
-          />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: 'var(--accent)', flexShrink: 0 }} />
+            <Box component="span" sx={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--ink-2)', whiteSpace: 'nowrap' }}>
+              {dbVersionLabel}
+            </Box>
+          </Box>
         </Box>
 
         {/* 标题块：永远 prominent 居中 */}
