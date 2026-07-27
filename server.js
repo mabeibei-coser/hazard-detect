@@ -11,15 +11,16 @@ const { getSession } = await import("./lib/session.js");
 const { getDb, upsertUserByPhone, insertReport, getReportById } = await import("./lib/db.js");
 const { buildSystemPrompt, parseResult, SCENARIO_LABELS } = await import("./lib/prompts.js");
 const { signDownloadToken, verifyDownloadToken } = await import("./lib/download-token.js");
+const {
+  BananaRouterVisionError,
+  analyzeImageWithBananaRouter,
+  getBananaRouterVisionConfig,
+} = await import("./lib/bananarouter-gemini-vision.js");
 
 const PORT = Number(process.env.HAZARD_API_PORT || process.env.PORT) || 4001;
 // 会员中心地址：A600 通过 HTTP 问中心"这人是不是 VIP"（不直读中心数据库，零 schema 耦合）
 const CENTER_BASE_URL = process.env.ASG_CENTER_BASE_URL || "http://localhost:4002";
-const IFLYTEK_URL =
-  process.env.IFLYTEK_API_URL ||
-  "https://maas-coding-api.cn-huabei-1.xf-yun.com/v2/chat/completions";
-const IFLYTEK_API_KEY = process.env.IFLYTEK_API_KEY;
-const IFLYTEK_MODEL = process.env.IFLYTEK_MODEL || "astron-code-latest";
+const BANANAROUTER_CONFIG = getBananaRouterVisionConfig();
 
 const app = express();
 app.set("trust proxy", true);
@@ -73,7 +74,7 @@ app.post(
     if (!imageBase64 || typeof imageBase64 !== "string") {
       return res.status(400).json({ error: "缺少图片数据" });
     }
-    if (!IFLYTEK_API_KEY) {
+    if (!BANANAROUTER_CONFIG) {
       return res.status(500).json({ error: "服务器未配置 AI API key" });
     }
 
@@ -81,41 +82,12 @@ app.post(
     const startedAt = Date.now();
 
     try {
-      const upstream = await fetch(IFLYTEK_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${IFLYTEK_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: IFLYTEK_MODEL,
-          messages: [
-            { role: "system", content: buildSystemPrompt(scenario) },
-            {
-              role: "user",
-              content: [
-                { type: "image_url", image_url: { url: `data:${mime};base64,${imageBase64}` } },
-                { type: "text", text: "请按照 system prompt 中的检查清单，分析这张照片中能够直接看出的安全隐患。" },
-              ],
-            },
-          ],
-          temperature: 0.3,
-          max_tokens: 4000,
-        }),
-        signal: AbortSignal.timeout(120_000),
+      const content = await analyzeImageWithBananaRouter({
+        config: BANANAROUTER_CONFIG,
+        systemPrompt: buildSystemPrompt(scenario),
+        imageBase64,
+        mimeType: mime,
       });
-
-      if (!upstream.ok) {
-        const text = await upstream.text().catch(() => "");
-        console.error("[analyze] iFlytek HTTP", upstream.status, text.slice(0, 300));
-        return res.status(502).json({ error: `AI 请求失败 (${upstream.status})` });
-      }
-
-      const result = await upstream.json();
-      const content = result?.choices?.[0]?.message?.content;
-      if (!content) {
-        return res.status(502).json({ error: "AI 返回内容为空" });
-      }
 
       const hazards = parseResult(content);
       const durationMs = Date.now() - startedAt;
@@ -139,8 +111,12 @@ app.post(
 
       res.json({ ok: true, reportId, hazards, durationMs });
     } catch (err) {
-      if (err?.name === "TimeoutError" || err?.name === "AbortError") {
+      if (err instanceof BananaRouterVisionError && err.category === "timeout") {
         return res.status(504).json({ error: "请求超时（120秒），请稍后重试" });
+      }
+      if (err instanceof BananaRouterVisionError) {
+        console.error("[analyze] BananaRouter failed:", err.category);
+        return res.status(502).json({ error: "AI 请求失败，请稍后重试" });
       }
       console.error("[analyze] failed:", err);
       res.status(500).json({ error: "识别失败，请稍后重试" });

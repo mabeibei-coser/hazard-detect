@@ -9,6 +9,8 @@
     "dev:vite": "vite",
     "dev:api": "node server.js",
     "build": "vite build",
+    "test:vision": "node --test --test-isolation=none tests/bananarouter-gemini-vision.test.mjs",
+    "test:e2e:local": "node tests/local-flow.e2e.mjs",
     "start": "NODE_ENV=production node server.js",
     "preview": "vite preview"
   },

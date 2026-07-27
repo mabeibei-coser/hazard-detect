@@ -1,6 +1,6 @@
 /**
  * hazard-detect API 客户端
- * 浏览器 → /api/analyze → Express → 讯飞 multimodal → 入库 → 返回隐患数组
+ * 浏览器 → /api/analyze → Express → Gemini 视觉模型 → 入库 → 返回隐患数组
  * 登录态来自「安全隐患域会员中心」的共享 cookie；A600 自己不再登录。
  */
 
