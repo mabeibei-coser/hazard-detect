@@ -9,6 +9,7 @@
     "dev:vite": "vite",
     "dev:api": "node server.js",
     "build": "vite build",
+    "test:vision": "node --test --test-isolation=none tests/bananarouter-gemini-vision.test.mjs",
     "start": "NODE_ENV=production node server.js",
     "preview": "vite preview"
   },

@@ -1,6 +1,6 @@
 # hazard-detect · 安全隐患识别
 
-AI 驱动的安全隐患图像识别系统。用户上传现场照片 + 选择场景，星火大模型按 36 个专业场景的检查清单识别隐患，输出 JSON 报告（名称/等级/描述/规范/建议/预算）。
+AI 驱动的安全隐患图像识别系统。用户上传现场照片 + 选择场景，Gemini 视觉模型按 36 个专业场景的检查清单识别隐患，输出 JSON 报告（名称/等级/描述/规范/建议/预算）。
 
 部署在 `https://h100.jsai100.com/a600/`。源自 `hezw02/ASG01`，由 mabeibei-coser 接管 + 改造为可入 admin-hub 后台的形态（手机号登录 + 报告自动入库）。
 
@@ -8,7 +8,7 @@ AI 驱动的安全隐患图像识别系统。用户上传现场照片 + 选择�
 
 - **前端**：React 18 + Vite + MUI（Material UI 9.x） + 玻璃拟态
 - **后端**：Node.js + Express + better-sqlite3 + iron-session
-- **AI**：讯飞星火 maaS multimodal（`astron-code-latest`）
+- **AI**：BananaRouter Gemini-native 视觉接口（`gemini-3.1-flash-lite`）
 - **部署**：腾讯云 Lighthouse + pm2 + nginx 反代
 
 ## 本机跑起来
@@ -19,7 +19,7 @@ npm install
 
 # 2. 配 env（首次）
 cp .env.local.example .env.local
-# 编辑 .env.local，填 IFLYTEK_API_KEY + HAZARD_SESSION_PASSWORD
+# 编辑 .env.local，填 BANANAROUTER_API_KEY + HAZARD_SESSION_PASSWORD
 # session 密钥用：
 #   node -e "console.log(require('crypto').randomBytes(48).toString('base64'))"
 
@@ -62,8 +62,9 @@ reports (
 
 | 变量 | 必填 | 说明 |
 |---|---|---|
-| `IFLYTEK_API_KEY` | ✓ | 讯飞 MaaS `api-key:secret`，服务端持有，浏览器不可见 |
-| `IFLYTEK_MODEL` | | 默认 `astron-code-latest` |
+| `BANANAROUTER_API_KEY` | ✓ | BananaRouter API key，服务端持有，浏览器不可见 |
+| `BANANAROUTER_BASE_URL` | | 默认 `https://api.bananarouter.com` |
+| `BANANAROUTER_MODEL` | | 默认 `gemini-3.1-flash-lite` |
 | `HAZARD_SESSION_PASSWORD` | ✓ | iron-session 密钥，≥32 字符，base64 推荐（避免 `$` 触发 dotenv 展开） |
 | `HAZARD_COOKIE_SECURE` | | `false` 本地 dev，生产 HTTPS 留空（默认严格） |
 | `HAZARD_COOKIE_PATH` | | 子路径部署填 `/a600` |
@@ -78,7 +79,7 @@ reports (
 | POST | `/api/login` | body `{ phone }`，11 位手机号无 OTP |
 | POST | `/api/logout` | 销毁 session |
 | GET | `/api/me` | 当前登录态 |
-| POST | `/api/analyze` | body `{ scenario, imageBase64, mimeType }`，登录后调，调讯飞 + 入库 + 返回 `{ reportId, hazards, durationMs }` |
+| POST | `/api/analyze` | body `{ scenario, imageBase64, mimeType }`，登录后调 Gemini 视觉模型 + 入库 + 返回 `{ reportId, hazards, durationMs }` |
 
 ## 36 个场景
 
